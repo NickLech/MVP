@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Routine Manager MVP+</title>
+  <style>
+    :root {
+      --verde: #064420;
+      --blu: #0a4d68;
+      --chiaro: #f0f8f8;
+      --bianco: #ffffff;
+      --ombra: rgba(0, 0, 0, 0.15);
+      --raggio: 14px;
+    }
+
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: linear-gradient(135deg, var(--verde) 20%, var(--blu) 80%);
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #222;
+    }
+
+    .app-wrapper {
+      width: 95%;
+      max-width: 1250px;
+      height: 90vh;
+      background: var(--bianco);
+      border-radius: var(--raggio);
+      display: grid;
+      grid-template-columns: 220px 1fr 400px;
+      box-shadow: 0 10px 30px var(--ombra);
+      overflow: hidden;
+      animation: fadeIn 0.8s ease;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background: linear-gradient(to bottom, var(--verde), var(--blu));
+      color: var(--bianco);
+      padding: 1.5rem 1rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .sidebar h2 {
+      font-size: 1.3rem;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .nav {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .nav button {
+      background: transparent;
+      color: var(--bianco);
+      border: none;
+      padding: 0.8rem;
+      text-align: left;
+      border-radius: var(--raggio);
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 1rem;
+    }
+
+    .nav button:hover,
+    .nav button.active {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateX(4px);
+    }
+
+    /* Main area */
+    main {
+      background: var(--chiaro);
+      padding: 1.5rem;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .screen { display: none; animation: fadeIn 0.4s ease; }
+    .screen.active { display: block; }
+
+    .card {
+      background: var(--bianco);
+      border-radius: var(--raggio);
+      padding: 1rem 1.2rem;
+      box-shadow: 0 2px 8px var(--ombra);
+      transition: transform 0.2s ease;
+      margin-bottom: 1rem;
+    }
+
+    .card:hover { transform: scale(1.02); }
+
+    .card h3 { margin-top: 0; color: var(--blu); }
+
+    .chart {
+      width: 100%;
+      height: 160px;
+      background: linear-gradient(to top, var(--blu) 20%, var(--verde) 80%);
+      border-radius: var(--raggio);
+      margin: 1rem 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .chart::after {
+      content: "";
+      position: absolute;
+      width: 100%;
+      height: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      clip-path: polygon(0 100%, 10% 70%, 25% 85%, 40% 40%, 55% 75%, 70% 50%, 90% 65%, 100% 45%, 100% 100%);
+    }
+
+    /* Chat */
+    .chat {
+      display: flex;
+      flex-direction: column;
+      border-left: 1px solid #ddd;
+      background: #f9f9f9;
+    }
+
+    .chat-header {
+      background: linear-gradient(to right, var(--verde), var(--blu));
+      color: var(--bianco);
+      padding: 1rem;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .chat-messages {
+      flex: 1;
+      padding: 1rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .message {
+      max-width: 80%;
+      padding: 0.7rem 1rem;
+      border-radius: var(--raggio);
+      box-shadow: 0 2px 6px var(--ombra);
+      animation: slideUp 0.3s ease;
+      line-height: 1.4;
+    }
+
+    .message.AI {
+      align-self: flex-start;
+      background: var(--blu);
+      color: var(--bianco);
+      border-bottom-left-radius: 0;
+    }
+
+    .message.Utente {
+      align-self: flex-end;
+      background: var(--verde);
+      color: var(--bianco);
+      border-bottom-right-radius: 0;
+    }
+
+    .chat-footer {
+      padding: 1rem;
+      border-top: 1px solid #ddd;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      background: var(--bianco);
+    }
+
+    .suggestions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .suggestions button {
+      background: #e8f2f1;
+      border: none;
+      border-radius: var(--raggio);
+      padding: 0.4rem 0.8rem;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.3s ease;
+      color: var(--blu);
+    }
+
+    .suggestions button:hover {
+      background: var(--blu);
+      color: var(--bianco);
+    }
+
+    input {
+      flex: 1;
+      padding: 0.7rem 1rem;
+      border: 1px solid #ccc;
+      border-radius: var(--raggio);
+      outline: none;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 0.6rem;
+      align-items: center;
+    }
+
+    button.send {
+      background: linear-gradient(135deg, var(--verde), var(--blu));
+      color: var(--bianco);
+      border: none;
+      border-radius: var(--raggio);
+      padding: 0.8rem 1.2rem;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.3s, transform 0.2s;
+    }
+
+    button.send:hover {
+      background: linear-gradient(135deg, var(--blu), var(--verde));
+      transform: scale(1.03);
+    }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    main::-webkit-scrollbar,
+    .chat-messages::-webkit-scrollbar {
+      width: 8px;
+    }
+    main::-webkit-scrollbar-thumb,
+    .chat-messages::-webkit-scrollbar-thumb {
+      background: var(--blu);
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-wrapper">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div>
+        <h2>AI Routine</h2>
+        <nav class="nav">
+          <button class="active" data-screen="dashboard">🏠 Dashboard</button>
+          <button data-screen="calendar">📅 Calendar</button>
+          <button data-screen="finance">💰 Finanze</button>
+          <button data-screen="routine">🧠 Routine</button>
+          <button data-screen="insights">✨ AI Insights</button>
+        </nav>
+      </div>
+      <div class="sidebar-footer">© 2025 AI Manager</div>
+    </aside>
+
+    <!-- Main -->
+    <main id="main-content">
+      <section id="dashboard" class="screen active">
+        <h1>Buongiorno, Luca 👋</h1>
+        <div class="card"><h3>📅 Agenda</h3><p>Riunione alle <strong>10:00</strong> – Team Progetto</p><p>Treno Milano <strong>17:30</strong></p></div>
+        <div class="card"><h3>💰 Finanze</h3><p>Saldo: <strong>2.500 €</strong></p><p>Budget “Cene fuori” superato +20%</p></div>
+        <div class="card"><h3>🧠 Routine</h3><p>Promemoria pre-riunione e check-in treno da impostare.</p></div>
+      </section>
+
+      <section id="calendar" class="screen">
+        <h1>📅 Google Calendar</h1>
+        <div class="card"><h3>Eventi di oggi</h3><ul><li>10:00 - Riunione team</li><li>13:00 - Pranzo partner</li><li>17:30 - Treno Milano</li></ul></div>
+      </section>
+
+      <section id="finance" class="screen">
+        <h1>💰 Finanze</h1>
+        <div class="card"><h3>Andamento spese</h3><div class="chart"></div><p>Media mensile: 1.200 €</p></div>
+      </section>
+
+      <section id="routine" class="screen">
+        <h1>🧠 Routine</h1>
+        <div class="card"><h3>Oggi</h3><ul><li>☀️ Meditazione</li><li>💻 Revisione obiettivi</li><li>🏋️ Allenamento</li></ul></div>
+      </section>
+
+      <section id="insights" class="screen">
+        <h1>✨ AI Insights</h1>
+        <div class="card"><p>“Hai una giornata intensa, potresti pianificare 15’ di pausa dopo la riunione.”</p></div>
+      </section>
+    </main>
+
+    <!-- Chat -->
+    <section class="chat">
+      <div class="chat-header">Assistente AI</div>
+      <div class="chat-messages" id="messages"></div>
+      <div class="chat-footer">
+        <div class="suggestions" id="suggestions">
+          <button data-msg="mostrami il calendario">📅 calendario</button>
+          <button data-msg="analizza le mie finanze">💰 finanze</button>
+          <button data-msg="migliora la mia routine">🧠 routine</button>
+          <button data-msg="dammi un consiglio">✨ consiglio</button>
+          <button data-msg="riepilogo giornata">📊 riepilogo</button>
+        </div>
+        <div class="input-row">
+          <input id="userInput" type="text" placeholder="Scrivi o tocca un suggerimento..." />
+          <button class="send" id="sendBtn">Invia</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // CHAT + NAVIGAZIONE
+    const messagesContainer = document.getElementById('messages');
+    const userInput = document.getElementById('userInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const suggestions = document.querySelectorAll('#suggestions button');
+    const navButtons = document.querySelectorAll('.nav button');
+    const screens = document.querySelectorAll('.screen');
+
+    let messages = [
+      { sender: 'AI', text: 'Ciao Luca! Sono il tuo assistente personale 🌿' },
+      { sender: 'AI', text: 'Posso mostrarti la giornata, analizzare le spese o ottimizzare la routine.' },
+      { sender: 'AI', text: 'Scegli un suggerimento qui sotto per iniziare 👇' }
+    ];
+
+    function renderMessages() {
+      messagesContainer.innerHTML = '';
+      messages.forEach(msg => {
+        const div = document.createElement('div');
+        div.classList.add('message', msg.sender);
+        div.textContent = msg.text;
+        messagesContainer.appendChild(div);
+      });
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    function aiRespond(input) {
+      const lower = input.toLowerCase();
+      let response = "Mi dispiace, puoi riformulare?";
+      let screen = null;
+
+      if (lower.includes('calendario')) {
+        response = "Ecco i tuoi eventi di oggi: riunione alle 10:00, pranzo alle 13:00, treno alle 17:30.";
+        screen = "calendar";
+      } else if (lower.includes('finanze')) {
+        response = "Hai un saldo di 2.500 € e un eccesso del 20% sulle spese per cene fuori. Vuoi un piano di risparmio?";
+        screen = "finance";
+      } else if (lower.includes('routine')) {
+        response = "La tua routine di oggi prevede meditazione, revisione obiettivi e allenamento serale.";
+        screen = "routine";
+      } else if (lower.includes('riepilogo')) {
+        response = "Oggi hai tre impegni principali. Ti consiglio di lasciare 30 minuti di pausa tra riunione e viaggio.";
+        screen = "dashboard";
+      } else if (lower.includes('consiglio') || lower.includes('ai')) {
+        response = "Suggerimento AI: riduci il multitasking nelle prime ore del mattino per aumentare il focus del 25%.";
+        screen = "insights";
+      } else if (lower.includes('ciao') || lower.includes('hey')) {
+        response = "Ciao! Come posso aiutarti oggi?";
+      } else if (lower.includes('grazie')) {
+        response = "È un piacere! 💫";
+      } else if (lower.includes('ok')) {
+        response = "Perfetto, procediamo!";
+      }
+
+      messages.push({ sender: 'AI', text: response });
+      renderMessages();
+
+      // cambia schermata se rilevato contesto
+      if (screen) {
+        navButtons.forEach(b => b.classList.remove('active'));
+        screens.forEach(s => s.classList.remove('active'));
+        document.querySelector(`.nav button[data-screen="${screen}"]`).classList.add('active');
+        document.getElementById(screen).classList.add('active');
+      }
+    }
+
+    function sendMessage(text = null) {
+      const input = text || userInput.value.trim();
+      if (!input) return;
+      messages.push({ sender: 'Utente', text: input });
+      userInput.value = '';
+      renderMessages();
+      setTimeout(() => aiRespond(input), 500);
+    }
+
+    sendBtn.addEventListener('click', () => sendMessage());
+    userInput.addEventListener('keyup', (e) => { if (e.key === 'Enter') sendMessage(); });
+    suggestions.forEach(btn => btn.addEventListener('click', () => sendMessage(btn.dataset.msg)));
+
+    // NAVIGAZIONE
+    navButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        navButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        screens.forEach(sec => sec.classList.remove('active'));
+        document.getElementById(btn.dataset.screen).classList.add('active');
+      });
+    });
+
+    renderMessages();
+  </script>
+</body>
+</html>
