@@ -1,450 +1,332 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI Routine Manager MVP</title>
-  
-
-
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AI Routine Manager - Fix Scroll</title>
   <style>
-  :root {
-    --verde: #064420;
-    --blu: #0a4d68;
-    --chiaro: #f0f8f8;
-    --bianco: #ffffff;
-    --ombra: rgba(0, 0, 0, 0.15);
-    --raggio: 14px;
-  }
+    :root{
+      --verde:#064420; --blu:#0a4d68; --chiaro:#f0f8f8; --bianco:#fff;
+      --ombra: rgba(0,0,0,0.15); --raggio:14px;
+    }
+    html,body{height:100%;margin:0;}
+    body{
+      font-family:"Segoe UI",Arial,sans-serif;
+      background:linear-gradient(135deg,var(--verde)20%,var(--blu)80%);
+      display:flex;align-items:center;justify-content:center;
+      color:#222;overflow:hidden;
+    }
 
-  html, body {
-    height: 100%;
-    margin: 0;
-  }
+    /* wrapper visibile */
+    .app-wrapper{
+      width:95%;max-width:1250px;height:90vh;
+      background:var(--bianco);border-radius:var(--raggio);
+      display:grid;grid-template-columns:220px 1fr 400px;
+      box-shadow:0 10px 30px var(--ombra);overflow:hidden;
+    }
 
-  body {
-    font-family: "Segoe UI", Arial, sans-serif;
-    background: linear-gradient(135deg, var(--verde) 20%, var(--blu) 80%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #222;
-    overflow: hidden; /* evita che la pagina intera scorra */
-  }
+    /* sidebar */
+    .sidebar{
+      background:linear-gradient(to bottom,var(--verde),var(--blu));
+      color:var(--bianco);padding:1.5rem 1rem;display:flex;
+      flex-direction:column;justify-content:space-between;
+    }
+    .sidebar h2{font-size:1.3rem;margin:0 0 1.5rem 0;text-align:center;}
+    .nav{display:flex;flex-direction:column;gap:1rem;}
+    .nav button{
+      background:transparent;color:var(--bianco);border:none;
+      padding:0.8rem;text-align:left;border-radius:10px;cursor:pointer;
+    }
+    .nav button.active, .nav button:hover{
+      background:rgba(255,255,255,0.12); transform:translateX(4px);
+    }
 
-  .app-wrapper {
-    width: 95%;
-    max-width: 1250px;
-    height: 90vh;
-    background: var(--bianco);
-    border-radius: var(--raggio);
-    display: grid;
-    grid-template-columns: 220px 1fr 400px;
-    box-shadow: 0 10px 30px var(--ombra);
-    overflow: hidden;
-    animation: fadeIn 0.8s ease;
-  }
+    /* main area */
+    main{
+      background:var(--chiaro); padding:1.5rem; overflow:auto;
+    }
+    .screen{display:none;}
+    .screen.active{display:block;}
+    .card{
+      background:var(--bianco);border-radius:var(--raggio);
+      padding:1rem 1.2rem;box-shadow:0 2px 8px var(--ombra);
+      margin-bottom:1rem;
+    }
+    .card h3{color:var(--blu);margin-top:0;}
 
-  .sidebar {
-    background: linear-gradient(to bottom, var(--verde), var(--blu));
-    color: var(--bianco);
-    padding: 1.5rem 1rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-  }
+    /* chat column */
+    .chat{
+      display:flex;flex-direction:column;height:100%;
+      border-left:1px solid #ddd;background:#f9f9f9;
+      /* cruciale per far funzionare lo scroll interno: lascia comprimere il contenitore */
+      min-height:0;
+    }
+    .chat-header{
+      background:linear-gradient(to right,var(--verde),var(--blu));
+      color:var(--bianco);padding:1rem;font-weight:600;text-align:center;
+      flex-shrink:0;
+    }
 
-  .sidebar h2 {
-    font-size: 1.3rem;
-    margin-bottom: 2rem;
-    text-align: center;
-  }
+    /* area messaggi: flex:1, overflow, e min-height:0 permettono lo scroll corretto */
+    .chat-messages{
+      flex:1;padding:1rem;display:flex;flex-direction:column;gap:0.6rem;
+      overflow-y:auto; scroll-behavior:smooth; min-height:0;
+      background:#fafafa;
+    }
 
-  .nav {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
+    .message{
+      max-width:80%; padding:0.7rem 1rem; border-radius:var(--raggio);
+      box-shadow:0 2px 6px var(--ombra); line-height:1.4; word-wrap:break-word;
+    }
+    .message.AI{ align-self:flex-start; background:var(--blu); color:var(--bianco); border-bottom-left-radius:0; }
+    .message.Utente{ align-self:flex-end; background:var(--verde); color:var(--bianco); border-bottom-right-radius:0; }
 
-  .nav button {
-    background: transparent;
-    color: var(--bianco);
-    border: none;
-    padding: 0.8rem;
-    text-align: left;
-    border-radius: var(--raggio);
-    cursor: pointer;
-    transition: all 0.3s;
-    font-size: 1rem;
-  }
+    .chat-footer{
+      padding:1rem;border-top:1px solid #ddd;display:flex;flex-direction:column;gap:0.6rem;
+      background:var(--bianco);flex-shrink:0;
+    }
 
-  .nav button:hover,
-  .nav button.active {
-    background: rgba(255, 255, 255, 0.2);
-    transform: translateX(4px);
-  }
+    .suggestions{display:flex;flex-wrap:wrap;gap:0.5rem;}
+    .suggestions button{
+      background:#e8f2f1;border:none;border-radius:12px;padding:0.4rem 0.8rem;cursor:pointer;color:var(--blu);
+    }
+    .suggestions button:hover{background:var(--blu);color:var(--bianco);}
 
-  main {
-    background: var(--chiaro);
-    padding: 1.5rem;
-    overflow-y: auto;
-    position: relative;
-  }
+    .input-row{display:flex;gap:0.6rem;align-items:center;}
+    input{flex:1;padding:0.7rem 1rem;border:1px solid #ccc;border-radius:12px;outline:none;}
+    button.send{background:linear-gradient(135deg,var(--verde),var(--blu));color:var(--bianco);border:none;border-radius:12px;padding:0.8rem 1.1rem;cursor:pointer;}
 
-  .screen {
-    display: none;
-    animation: fadeIn 0.4s ease;
-  }
+    /* switching */
+    .switch-page{ text-align:center;margin-top:1rem; }
+    .switch-page button{ background:#fff;color:var(--blu);border-radius:10px;padding:0.5rem 1rem;border:none;cursor:pointer; }
 
-  .screen.active {
-    display: block;
-  }
+    /* scrollbars */
+    .chat-messages::-webkit-scrollbar{ width:8px; }
+    .chat-messages::-webkit-scrollbar-thumb{ background:var(--blu); border-radius:4px; }
 
-  .card {
-    background: var(--bianco);
-    border-radius: var(--raggio);
-    padding: 1rem 1.2rem;
-    box-shadow: 0 2px 8px var(--ombra);
-    transition: transform 0.2s ease;
-    margin-bottom: 1rem;
-  }
-
-  .card:hover {
-    transform: scale(1.02);
-  }
-
-  .card h3 {
-    margin-top: 0;
-    color: var(--blu);
-  }
-
-  /* 🔧 CHAT LAYOUT FIX */
-  .chat {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    border-left: 1px solid #ddd;
-    background: #f9f9f9;
-  }
-
-  .chat-header {
-    background: linear-gradient(to right, var(--verde), var(--blu));
-    color: var(--bianco);
-    padding: 1rem;
-    font-weight: 600;
-    text-align: center;
-    flex-shrink: 0;
-  }
-
-  .chat-messages {
-    flex: 1;
-    padding: 1rem;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
-    scroll-behavior: smooth;
-    background: #fafafa;
-  }
-
-  .message {
-    max-width: 80%;
-    padding: 0.7rem 1rem;
-    border-radius: var(--raggio);
-    box-shadow: 0 2px 6px var(--ombra);
-    animation: slideUp 0.3s ease;
-    line-height: 1.4;
-    word-wrap: break-word;
-  }
-
-  .message.AI {
-    align-self: flex-start;
-    background: var(--blu);
-    color: var(--bianco);
-    border-bottom-left-radius: 0;
-  }
-
-  .message.Utente {
-    align-self: flex-end;
-    background: var(--verde);
-    color: var(--bianco);
-    border-bottom-right-radius: 0;
-  }
-
-  .chat-footer {
-    flex-shrink: 0;
-    padding: 1rem;
-    border-top: 1px solid #ddd;
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
-    background: var(--bianco);
-  }
-
-  .suggestions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-
-  .suggestions button {
-    background: #e8f2f1;
-    border: none;
-    border-radius: var(--raggio);
-    padding: 0.4rem 0.8rem;
-    cursor: pointer;
-    font-size: 0.85rem;
-    transition: all 0.3s ease;
-    color: var(--blu);
-  }
-
-  .suggestions button:hover {
-    background: var(--blu);
-    color: var(--bianco);
-  }
-
-  input {
-    flex: 1;
-    padding: 0.7rem 1rem;
-    border: 1px solid #ccc;
-    border-radius: var(--raggio);
-    outline: none;
-  }
-
-  .input-row {
-    display: flex;
-    gap: 0.6rem;
-    align-items: center;
-  }
-
-  button.send {
-    background: linear-gradient(135deg, var(--verde), var(--blu));
-    color: var(--bianco);
-    border: none;
-    border-radius: var(--raggio);
-    padding: 0.8rem 1.2rem;
-    cursor: pointer;
-    font-weight: 600;
-    transition: background 0.3s, transform 0.2s;
-  }
-
-  button.send:hover {
-    background: linear-gradient(135deg, var(--blu), var(--verde));
-    transform: scale(1.03);
-  }
-
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  @keyframes slideUp {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  main::-webkit-scrollbar,
-  .chat-messages::-webkit-scrollbar {
-    width: 8px;
-  }
-
-  main::-webkit-scrollbar-thumb,
-  .chat-messages::-webkit-scrollbar-thumb {
-    background: var(--blu);
-    border-radius: 4px;
-  }
-
-  .switch-page {
-    text-align: center;
-    margin-top: 1rem;
-  }
-
-  .switch-page button {
-    background: #fff;
-    color: var(--blu);
-    border: 1px solid #fff;
-    border-radius: var(--raggio);
-    padding: 0.5rem 1rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-  }
-
-  .switch-page button:hover {
-    background: var(--blu);
-    color: var(--bianco);
-  }
-</style>
-
+    /* responsive small */
+    @media (max-width:1000px){
+      .app-wrapper{ grid-template-columns:200px 1fr; }
+      .chat{ display:none; } /* per semplicità su small */
+    }
+  </style>
 </head>
 <body>
-
-  <!-- Pagina UTENTE -->
+  <!-- USER PAGE -->
   <div class="app-wrapper" id="userPage">
     <aside class="sidebar">
       <div>
         <h2>AI Routine</h2>
-        <nav class="nav">
+        <nav class="nav" id="userNav">
           <button class="active" data-screen="dashboard">🏠 Dashboard</button>
           <button data-screen="calendar">📅 Calendar</button>
           <button data-screen="routine">🧠 Routine</button>
-          <button data-screen="insights">✨ Insights</button>
           <button data-screen="integrations">🔗 Integrazioni & Gruppi</button>
         </nav>
       </div>
-      <div class="switch-page">
-        <button onclick="switchPage('developer')">👨‍💻 Dev Mode</button>
+
+      <div>
+        <div class="switch-page">
+          <button id="toDev">👨‍💻 Vai a Dev</button>
+        </div>
+        <div style="font-size:0.8rem;opacity:0.8;text-align:center;margin-top:10px;">© 2025 AI Manager</div>
       </div>
     </aside>
 
-    <main id="main-content">
+    <main id="mainContent">
       <section id="dashboard" class="screen active">
         <h1>Benvenuto, Alessandro 👋</h1>
-        <div class="card"><h3>📅 Agenda</h3><p>10:00 - Riunione Progetto</p><p>17:30 - Treno Milano</p></div>
+        <div class="card"><h3>📅 Agenda</h3><p>10:00 - Riunione progetto</p><p>17:30 - Treno</p></div>
+        <div class="card"><h3>🧘 Benessere</h3><p>Pausa alle 15:00</p></div>
       </section>
+
       <section id="calendar" class="screen">
         <h1>📅 Calendario</h1>
-        <div class="card"><p>Riunione alle 10 e treno alle 17:30</p></div>
+        <div class="card"><ul><li>10:00 - Sync Team</li><li>13:00 - Pranzo</li></ul></div>
       </section>
+
       <section id="routine" class="screen">
         <h1>🧠 Routine</h1>
-        <div class="card"><p>Meditazione e allenamento completati.</p></div>
+        <div class="card"><ul><li>Meditazione</li><li>Focus time 9:00–11:00</li></ul></div>
       </section>
-      <section id="insights" class="screen">
-        <h1>✨ Consigli AI</h1>
-        <div class="card"><p>Prenditi 15 minuti di pausa dopo la riunione ☕</p></div>
-      </section>
+
       <section id="integrations" class="screen">
         <h1>🔗 Integrazioni & Gruppi</h1>
-        <div class="card"><h3>Collega App</h3><ul><li>Google Calendar</li><li>GitHub</li><li>WhatsApp</li></ul></div>
+        <div class="card">
+          <h3>App Collegate</h3>
+          <ul id="connectedApps"><li>Google Calendar (collegato)</li><li>GitHub (non collegato)</li></ul>
+          <button class="send" id="connectAppBtn">+ Collega App (simulato)</button>
+        </div>
+        <div class="card">
+          <h3>Gruppi</h3>
+          <div id="groupsList"><p>Nessun gruppo creato</p></div>
+          <button class="send" id="createGroupBtn">+ Crea gruppo</button>
+        </div>
       </section>
     </main>
 
-    <section class="chat">
+    <section class="chat" aria-label="chat">
       <div class="chat-header">Assistente AI</div>
-      <div class="chat-messages" id="messages"></div>
+
+      <div class="chat-messages" id="messages" aria-live="polite"></div>
+
       <div class="chat-footer">
         <div class="suggestions" id="suggestions">
           <button data-msg="mostrami il calendario">📅 calendario</button>
           <button data-msg="migliora la mia routine">🧠 routine</button>
           <button data-msg="dammi un consiglio">✨ consiglio</button>
         </div>
+
         <div class="input-row">
-          <input id="userInput" type="text" placeholder="Scrivi..." />
+          <input id="userInput" type="text" placeholder="Scrivi o tocca un suggerimento..." />
           <button class="send" id="sendBtn">Invia</button>
         </div>
       </div>
     </section>
   </div>
 
-  <!-- Pagina DEVELOPER -->
+  <!-- DEV PAGE -->
   <div class="app-wrapper" id="devPage" style="display:none;">
     <aside class="sidebar">
       <div>
         <h2>AI Dev Hub</h2>
-        <nav class="nav">
-          <button class="active" data-screen="dev-overview">🏗️ Overview</button>
-          <button data-screen="github">🐙 GitHub</button>
-          <button data-screen="api">🔌 API</button>
+        <nav class="nav" id="devNav">
+          <button class="active" data-screen="devOverview">🏗 Overview</button>
+          <button data-screen="devGit">🐙 GitHub</button>
+          <button data-screen="devAPI">🔌 API</button>
         </nav>
       </div>
-      <div class="switch-page">
-        <button onclick="switchPage('user')">🏠 Utente</button>
+
+      <div>
+        <div class="switch-page">
+          <button id="toUser">🏠 Torna a User</button>
+        </div>
+        <div style="font-size:0.8rem;opacity:0.8;text-align:center;margin-top:10px;">© 2025 AI Manager</div>
       </div>
     </aside>
 
-    <main id="main-dev">
-      <section id="dev-overview" class="screen active">
+    <main id="mainDev">
+      <section id="devOverview" class="screen active">
         <h1>Developer Dashboard</h1>
-        <div class="card"><p>Stato build: ✅ OK</p></div>
+        <div class="card"><h3>Build</h3><p>Ultima: 09:12 ✅</p></div>
       </section>
-      <section id="github" class="screen">
-        <h1>🐙 GitHub Activity</h1>
-        <div class="card"><p>Ultime PR e commit.</p></div>
+      <section id="devGit" class="screen">
+        <h1>GitHub</h1>
+        <div class="card"><p>PR aperte: 2 · Issue: 3</p></div>
       </section>
-      <section id="api" class="screen">
-        <h1>🔌 API Monitor</h1>
-        <div class="card"><p>API Online</p></div>
+      <section id="devAPI" class="screen">
+        <h1>API Monitor</h1>
+        <div class="card"><p>Latency media: 120ms</p></div>
       </section>
     </main>
+
+    <!-- nel dev page non mostriamo la chat -->
   </div>
 
   <script>
-    // --- GESTIONE PAGINE ---
-    function switchPage(mode) {
-      document.getElementById('userPage').style.display = (mode === 'user') ? 'grid' : 'none';
-      document.getElementById('devPage').style.display = (mode === 'developer') ? 'grid' : 'none';
-    }
-
-    // --- SIDEBAR UTENTE ---
-    document.querySelectorAll('#userPage .nav button').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('#userPage .nav button').forEach(b => b.classList.remove('active'));
+    /* ---------- NAV (USER) ---------- */
+    const userNavButtons = document.querySelectorAll('#userNav button');
+    userNavButtons.forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        userNavButtons.forEach(b=>b.classList.remove('active'));
         btn.classList.add('active');
-        const screen = btn.dataset.screen;
-        document.querySelectorAll('#userPage main .screen').forEach(s => s.classList.remove('active'));
-        document.getElementById(screen).classList.add('active');
+        document.querySelectorAll('#mainContent .screen').forEach(s=>s.classList.remove('active'));
+        const screen = document.getElementById(btn.dataset.screen);
+        if(screen) screen.classList.add('active');
       });
     });
 
-    // --- SIDEBAR DEVELOPER ---
-    document.querySelectorAll('#devPage .nav button').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('#devPage .nav button').forEach(b => b.classList.remove('active'));
+    /* ---------- NAV (DEV) ---------- */
+    const devNavButtons = document.querySelectorAll('#devNav button');
+    devNavButtons.forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        devNavButtons.forEach(b=>b.classList.remove('active'));
         btn.classList.add('active');
-        const screen = btn.dataset.screen;
-        document.querySelectorAll('#devPage main .screen').forEach(s => s.classList.remove('active'));
-        document.getElementById(screen).classList.add('active');
+        document.querySelectorAll('#mainDev .screen').forEach(s=>s.classList.remove('active'));
+        const screen = document.getElementById(btn.dataset.screen);
+        if(screen) screen.classList.add('active');
       });
     });
 
-    // --- CHAT FUNZIONANTE ---
-    const messagesContainer = document.getElementById('messages');
+    /* ---------- SWITCH PAGE ---------- */
+    document.getElementById('toDev').addEventListener('click', ()=> {
+      document.getElementById('userPage').style.display = 'none';
+      document.getElementById('devPage').style.display = 'grid';
+      // optional: focus first dev nav
+      devNavButtons[0].click();
+    });
+    document.getElementById('toUser').addEventListener('click', ()=> {
+      document.getElementById('devPage').style.display = 'none';
+      document.getElementById('userPage').style.display = 'grid';
+      userNavButtons[0].click();
+    });
+
+    /* ---------- CHAT ---------- */
+    const messagesEl = document.getElementById('messages');
     const userInput = document.getElementById('userInput');
     const sendBtn = document.getElementById('sendBtn');
+    const suggestions = document.getElementById('suggestions');
 
     const messages = [
-      { sender: 'AI', text: 'Ciao Alessandro! 🌿' },
-      { sender: 'AI', text: 'Posso mostrarti calendario, routine o consigli.' }
+      { sender:'AI', text:'Ciao Alessandro! Sono il tuo assistente 🌿' },
+      { sender:'AI', text:'Posso aiutarti con calendario, gruppi e suggerimenti.' }
     ];
 
-    function renderMessages() {
-      messagesContainer.innerHTML = '';
-      messages.forEach(m => {
-        const div = document.createElement('div');
-        div.classList.add('message', m.sender);
-        div.textContent = m.text;
-        messagesContainer.appendChild(div);
+    function renderMessages(){
+      messagesEl.innerHTML = '';
+      messages.forEach(m=>{
+        const d = document.createElement('div');
+        d.className = 'message ' + (m.sender === 'AI' ? 'AI' : 'Utente');
+        d.textContent = m.text;
+        messagesEl.appendChild(d);
       });
-      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      // scroll to last message robusto con scrollIntoView
+      const last = messagesEl.lastElementChild;
+      if(last) last.scrollIntoView({behavior:'auto', block:'end'});
     }
 
-    function aiRespond(input) {
-      let t = input.toLowerCase();
-      let r = "Mi dispiace, non ho capito.";
-      if (t.includes('calendario')) r = "Hai una riunione alle 10 e treno alle 17:30.";
-      else if (t.includes('routine')) r = "Routine: meditazione e focus time pomeridiano.";
-      else if (t.includes('consiglio')) r = "Prenditi 10 minuti per respirare e ricaricarti 🌿.";
-      messages.push({ sender: 'AI', text: r });
+    function aiReply(text){
+      const t = text.toLowerCase();
+      let reply = "Mi dispiace, puoi ripetere?";
+      if(t.includes('calendario')) reply = "Hai riunione alle 10:00 e treno alle 17:30.";
+      else if(t.includes('routine')) reply = "Routine suggerita: meditazione e blocco focus alle 9:00.";
+      else if(t.includes('consiglio')) reply = "Consiglio: pausa di 15 minuti dopo la riunione.";
+      else if(t.includes('collega') || t.includes('integrazione')) reply = "Vai su Integrazioni & Gruppi per aggiungere app o creare gruppi.";
+      messages.push({sender:'AI', text:reply});
       renderMessages();
     }
 
-    function sendMessage(msgText = null) {
-      const text = msgText || userInput.value.trim();
-      if (!text) return;
-      messages.push({ sender: 'Utente', text });
-      userInput.value = '';
+    function sendMessage(txt = null){
+      const text = txt || (userInput && userInput.value && userInput.value.trim());
+      if(!text) return;
+      messages.push({sender:'Utente', text});
+      if(userInput) userInput.value = '';
       renderMessages();
-      setTimeout(() => aiRespond(text), 400);
+      setTimeout(()=> aiReply(text), 350);
     }
 
-    sendBtn.addEventListener('click', () => sendMessage());
-    userInput.addEventListener('keyup', e => { if (e.key === 'Enter') sendMessage(); });
-
-    document.querySelectorAll('#suggestions button').forEach(btn => {
-      btn.addEventListener('click', () => sendMessage(btn.dataset.msg));
+    // inizializzo chat e suggerimenti
+    renderMessages();
+    sendBtn && sendBtn.addEventListener('click', ()=> sendMessage());
+    userInput && userInput.addEventListener('keyup', e=> { if(e.key==='Enter') sendMessage(); });
+    suggestions && suggestions.addEventListener('click', (ev)=>{
+      const btn = ev.target.closest('button[data-msg]');
+      if(btn) sendMessage(btn.dataset.msg);
     });
 
-    renderMessages();
+    /* ---------- INTEGRAZIONI e GRUPPI (simulati) ---------- */
+    document.getElementById('connectAppBtn').addEventListener('click', ()=>{
+      const ul = document.getElementById('connectedApps');
+      const li = document.createElement('li'); li.textContent = 'GitHub (collegato)';
+      ul.appendChild(li);
+    });
+
+    document.getElementById('createGroupBtn').addEventListener('click', ()=>{
+      const groups = document.getElementById('groupsList');
+      groups.innerHTML = '<div><strong>Team Progetto</strong><p>Member: Maria, Luca, Alessandro</p></div>';
+    });
+
+    // fine script
   </script>
 </body>
 </html>
