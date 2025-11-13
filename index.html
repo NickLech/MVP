@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI Routine Manager MVP+</title>
+  <title>AI Routine Manager MVP</title>
   <style>
     :root {
       --verde: #064420;
@@ -38,7 +38,6 @@
       animation: fadeIn 0.8s ease;
     }
 
-    /* Sidebar */
     .sidebar {
       background: linear-gradient(to bottom, var(--verde), var(--blu));
       color: var(--bianco);
@@ -78,7 +77,6 @@
       transform: translateX(4px);
     }
 
-    /* Main */
     main {
       background: var(--chiaro);
       padding: 1.5rem;
@@ -113,7 +111,6 @@
       color: var(--blu);
     }
 
-    /* Chat */
     .chat {
       display: flex;
       flex-direction: column;
@@ -136,7 +133,6 @@
       display: flex;
       flex-direction: column;
       gap: 0.6rem;
-      height: 100%;
       scroll-behavior: smooth;
     }
 
@@ -235,7 +231,6 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Scrollbar */
     main::-webkit-scrollbar,
     .chat-messages::-webkit-scrollbar {
       width: 8px;
@@ -247,7 +242,6 @@
       border-radius: 4px;
     }
 
-    /* Switch page button */
     .switch-page {
       text-align: center;
       margin-top: 1rem;
@@ -270,6 +264,8 @@
   </style>
 </head>
 <body>
+
+  <!-- Pagina UTENTE -->
   <div class="app-wrapper" id="userPage">
     <aside class="sidebar">
       <div>
@@ -291,41 +287,22 @@
       <section id="dashboard" class="screen active">
         <h1>Benvenuto, Alessandro 👋</h1>
         <div class="card"><h3>📅 Agenda</h3><p>10:00 - Riunione Progetto</p><p>17:30 - Treno Milano</p></div>
-        <div class="card"><h3>🧠 Routine</h3><p>Meditazione mattutina completata ✔️</p></div>
       </section>
-
       <section id="calendar" class="screen">
         <h1>📅 Calendario</h1>
-        <div class="card"><ul><li>10:00 - Team meeting</li><li>13:00 - Pranzo</li></ul></div>
+        <div class="card"><p>Riunione alle 10 e treno alle 17:30</p></div>
       </section>
-
       <section id="routine" class="screen">
         <h1>🧠 Routine</h1>
-        <div class="card"><ul><li>☀️ Meditazione</li><li>💻 Revisione obiettivi</li></ul></div>
+        <div class="card"><p>Meditazione e allenamento completati.</p></div>
       </section>
-
       <section id="insights" class="screen">
         <h1>✨ Consigli AI</h1>
-        <div class="card"><p>Hai una giornata intensa: prenditi 15 minuti di pausa dopo la riunione ☕</p></div>
+        <div class="card"><p>Prenditi 15 minuti di pausa dopo la riunione ☕</p></div>
       </section>
-
       <section id="integrations" class="screen">
         <h1>🔗 Integrazioni & Gruppi</h1>
-        <div class="card">
-          <h3>Collega le tue app</h3>
-          <ul>
-            <li>✅ Google Calendar</li>
-            <li>⚙️ GitHub</li>
-            <li>⚙️ WhatsApp</li>
-            <li>⚙️ Google Drive</li>
-          </ul>
-          <button class="send">+ Aggiungi integrazione</button>
-        </div>
-        <div class="card">
-          <h3>Gestione Gruppi</h3>
-          <p>Crea o unisciti a un gruppo di lavoro o famiglia:</p>
-          <button class="send">+ Crea gruppo</button>
-        </div>
+        <div class="card"><h3>Collega App</h3><ul><li>Google Calendar</li><li>GitHub</li><li>WhatsApp</li></ul></div>
       </section>
     </main>
 
@@ -337,108 +314,122 @@
           <button data-msg="mostrami il calendario">📅 calendario</button>
           <button data-msg="migliora la mia routine">🧠 routine</button>
           <button data-msg="dammi un consiglio">✨ consiglio</button>
-          <button data-msg="collega app">🔗 integrazioni</button>
         </div>
         <div class="input-row">
-          <input id="userInput" type="text" placeholder="Scrivi o tocca un suggerimento..." />
+          <input id="userInput" type="text" placeholder="Scrivi..." />
           <button class="send" id="sendBtn">Invia</button>
         </div>
       </div>
     </section>
   </div>
 
-  <!-- Pagina Developer -->
+  <!-- Pagina DEVELOPER -->
   <div class="app-wrapper" id="devPage" style="display:none;">
     <aside class="sidebar">
       <div>
         <h2>AI Dev Hub</h2>
         <nav class="nav">
-          <button class="active" data-screen="dashboard-dev">🏗️ Overview</button>
+          <button class="active" data-screen="dev-overview">🏗️ Overview</button>
           <button data-screen="github">🐙 GitHub</button>
-          <button data-screen="api">🔌 API Monitor</button>
-          <button data-screen="ai-dev">🤖 AI Tools</button>
+          <button data-screen="api">🔌 API</button>
         </nav>
       </div>
       <div class="switch-page">
-        <button onclick="switchPage('user')">🏠 Utente Base</button>
+        <button onclick="switchPage('user')">🏠 Utente</button>
       </div>
     </aside>
 
-    <main>
-      <section id="dashboard-dev" class="screen active">
+    <main id="main-dev">
+      <section id="dev-overview" class="screen active">
         <h1>Developer Dashboard</h1>
-        <div class="card"><h3>⚙️ Stato build</h3><p>Ultima compilazione: 09:12 ✅</p></div>
-        <div class="card"><h3>📦 Repositories collegati</h3><ul><li>frontend-ai-routine</li><li>backend-api-manager</li></ul></div>
+        <div class="card"><p>Stato build: ✅ OK</p></div>
       </section>
-
       <section id="github" class="screen">
         <h1>🐙 GitHub Activity</h1>
-        <div class="card"><p>Ultime issue aggiornate e PR recenti.</p></div>
+        <div class="card"><p>Ultime PR e commit.</p></div>
       </section>
-
       <section id="api" class="screen">
         <h1>🔌 API Monitor</h1>
-        <div class="card"><p>Status API: <strong>Online</strong></p><p>Latency media: 142ms</p></div>
-      </section>
-
-      <section id="ai-dev" class="screen">
-        <h1>🤖 AI Tools</h1>
-        <div class="card"><p>Testa prompt e modelli su dati reali.</p></div>
+        <div class="card"><p>API Online</p></div>
       </section>
     </main>
   </div>
 
   <script>
+    // --- GESTIONE PAGINE ---
+    function switchPage(mode) {
+      document.getElementById('userPage').style.display = (mode === 'user') ? 'grid' : 'none';
+      document.getElementById('devPage').style.display = (mode === 'developer') ? 'grid' : 'none';
+    }
+
+    // --- SIDEBAR UTENTE ---
+    document.querySelectorAll('#userPage .nav button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#userPage .nav button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const screen = btn.dataset.screen;
+        document.querySelectorAll('#userPage main .screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(screen).classList.add('active');
+      });
+    });
+
+    // --- SIDEBAR DEVELOPER ---
+    document.querySelectorAll('#devPage .nav button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#devPage .nav button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const screen = btn.dataset.screen;
+        document.querySelectorAll('#devPage main .screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(screen).classList.add('active');
+      });
+    });
+
+    // --- CHAT FUNZIONANTE ---
     const messagesContainer = document.getElementById('messages');
     const userInput = document.getElementById('userInput');
     const sendBtn = document.getElementById('sendBtn');
-    const suggestions = document.querySelectorAll('#suggestions button');
 
-    let messages = [
-      { sender: 'AI', text: 'Ciao Alessandro! Sono il tuo assistente 🌿' },
-      { sender: 'AI', text: 'Posso mostrarti calendario, routine o gestire integrazioni.' }
+    const messages = [
+      { sender: 'AI', text: 'Ciao Alessandro! 🌿' },
+      { sender: 'AI', text: 'Posso mostrarti calendario, routine o consigli.' }
     ];
 
     function renderMessages() {
       messagesContainer.innerHTML = '';
-      messages.forEach(msg => {
+      messages.forEach(m => {
         const div = document.createElement('div');
-        div.classList.add('message', msg.sender);
-        div.textContent = msg.text;
+        div.classList.add('message', m.sender);
+        div.textContent = m.text;
         messagesContainer.appendChild(div);
       });
       messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
 
     function aiRespond(input) {
-      const lower = input.toLowerCase();
-      let response = "Mi dispiace, non ho capito.";
-      if (lower.includes('calendario')) response = "Oggi: riunione alle 10 e treno alle 17:30.";
-      else if (lower.includes('routine')) response = "La tua routine include meditazione e allenamento.";
-      else if (lower.includes('consiglio')) response = "Suggerimento AI: pianifica 15 minuti di pausa post-riunione.";
-      else if (lower.includes('collega') || lower.includes('app')) response = "Puoi collegare Google Calendar, GitHub o WhatsApp nella sezione integrazioni.";
-
-      messages.push({ sender: 'AI', text: response });
+      let t = input.toLowerCase();
+      let r = "Mi dispiace, non ho capito.";
+      if (t.includes('calendario')) r = "Hai una riunione alle 10 e treno alle 17:30.";
+      else if (t.includes('routine')) r = "Routine: meditazione e focus time pomeridiano.";
+      else if (t.includes('consiglio')) r = "Prenditi 10 minuti per respirare e ricaricarti 🌿.";
+      messages.push({ sender: 'AI', text: r });
       renderMessages();
     }
 
-    function sendMessage(text = null) {
-      const input = text || userInput.value.trim();
-      if (!input) return;
-      messages.push({ sender: 'Utente', text: input });
+    function sendMessage(msgText = null) {
+      const text = msgText || userInput.value.trim();
+      if (!text) return;
+      messages.push({ sender: 'Utente', text });
       userInput.value = '';
       renderMessages();
-      setTimeout(() => aiRespond(input), 500);
+      setTimeout(() => aiRespond(text), 400);
     }
 
     sendBtn.addEventListener('click', () => sendMessage());
-    userInput.addEventListener('keyup', (e) => { if (e.key === 'Enter') sendMessage(); });
-    suggestions.forEach(btn => btn.addEventListener('click', () => sendMessage(btn.dataset.msg)));
+    userInput.addEventListener('keyup', e => { if (e.key === 'Enter') sendMessage(); });
 
-    function switchPage(mode) {
-      document.getElementById('userPage').style.display = mode === 'user' ? 'grid' : 'none';
-      document.getElementById('devPage').style.display = mode === 'developer' ? 'grid' : 'none';
-    }
+    document.querySelectorAll('#suggestions button').forEach(btn => {
+      btn.addEventListener('click', () => sendMessage(btn.dataset.msg));
+    });
 
     renderMessages();
   </script>
