@@ -361,21 +361,71 @@
         container.scrollTop = container.scrollHeight;
       }
 
+      function aiSuggestion(userMsg) {
+        // Debug: log input so we can inspect what arrives here in DevTools
+        console.log('[aiSuggestion] raw input:', userMsg);
+
+        // Guard: ensure we have a string
+        if (!userMsg || typeof userMsg !== 'string') {
+          return "Posso aiutarti a gestire i tuoi impegni! Dimmi cosa vuoi pianificare.";
+        }
+
+        // Normalize to remove accents, trim and lowercase so matching is robust
+        // e.g. "famiglia", "Famiglia", "famìglia" -> "famiglia"
+        const normalized = userMsg
+          .normalize && userMsg.normalize('NFD').replace(/\p{Diacritic}/gu, '')
+          || userMsg;
+        const text = String(normalized).toLowerCase().trim();
+        console.log('[aiSuggestion] normalized:', text);
+
+        // Use word-boundary regex checks to avoid substring false-positives
+        if (/\bfamiglia\b/.test(text)) {
+          return "Ti suggerisco di fare la spesa verso le 18:00, dopo l’allenamento.";
+        }
+        if (/\broutine\b/.test(text)) {
+          return "Ottimo, l’allenamento alle 17:30 è già programmato nella tua routine!";
+        }
+        if (/\bcalendario\b/.test(text)) {
+          return "Hai già una riunione martedì alle 10:00. Vuoi prepararti il giorno prima?";
+        }
+
+        return "Posso aiutarti a gestire i tuoi impegni! Dimmi cosa vuoi pianificare.";
+      }
+
+      // Centralized send function to avoid timing issues when suggestions set input.value
+      function performSend(msg) {
+        console.log('[performSend] msg before trim:', JSON.stringify(msg));
+        if (!msg || String(msg).trim() === '') {
+          console.warn('[performSend] empty message - aborting send');
+          return;
+        }
+        const trimmed = String(msg).trim();
+        sendMessage(trimmed, "Utente");
+        setTimeout(() => sendMessage(aiSuggestion(trimmed), "AI"), 600);
+        // clear the input UI if it's the text input
+        try { input.value = ''; } catch (e) { /* ignore */ }
+      }
+
       sendBtn.addEventListener("click", () => {
-        if (!input.value) return;
-        sendMessage(input.value, "Utente");
-        setTimeout(() => sendMessage("Risposta automatica: " + input.value, "AI"), 600);
-        input.value = "";
+        // Log the value so we can see exactly what's sent when clicking the send button
+        console.log('[sendBtn] input.value:', JSON.stringify(input.value));
+        performSend(input.value);
       });
 
       input.addEventListener("keypress", e => {
-        if (e.key === "Enter") sendBtn.click();
+        if (e.key === "Enter") {
+          e.preventDefault();
+          performSend(input.value);
+        }
       });
 
       suggestions.querySelectorAll("button").forEach(b => {
         b.addEventListener("click", () => {
-          input.value = b.dataset.msg;
-          sendBtn.click();
+          // Read the suggestion directly from dataset and send it via performSend.
+          // This avoids relying on setting input.value and then programmatically clicking the send button,
+          // which in some edge cases can lead to timing/order issues.
+          console.log('[suggestion click] data-msg:', JSON.stringify(b.dataset.msg));
+          performSend(b.dataset.msg);
         });
       });
     }
