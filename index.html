@@ -160,12 +160,11 @@ button.send{background:linear-gradient(135deg,var(--verde),var(--blu));color:var
         <ul id="connectedApps">
           <li>Google Calendar (collegato)</li>
         </ul>
-        <button class="send" id="connectAppBtn">+ Collega App</button>
+        <button class="send" id="addServiceBtnUser">+ Aggiungi servizio</button>
       </div>
       <div class="integration-box">
         <h4>Gruppi</h4>
-        <div id="groupsList"><p>Nessun gruppo creato</p></div>
-        <button class="send" id="createGroupBtn">+ Crea gruppo</button>
+        <div id="groupsList"><div><strong>Famiglia</strong><p>Suggerimento: pranzo sabato</p></div></div>
       </div>
     </section>
   </main>
@@ -196,6 +195,7 @@ button.send{background:linear-gradient(135deg,var(--verde),var(--blu));color:var
         <button class="active" data-screen="devOverview">🏗 Overview</button>
         <button data-screen="devGit">🐙 GitHub</button>
         <button data-screen="devAPI">🔌 API</button>
+        <button data-screen="devGroups">👥 Gruppi</button>
       </nav>
     </div>
     <div>
@@ -214,40 +214,48 @@ button.send{background:linear-gradient(135deg,var(--verde),var(--blu));color:var
     <section id="devGit" class="screen">
       <h1>GitHub</h1>
       <div class="card"><p>PR aperte: 2 · Issue: 3</p></div>
+      <div class="integration-box">
+        <h4>App Collegate</h4>
+        <ul id="connectedAppsDev"><li>GitHub (collegato)</li></ul>
+        <button class="send" id="addServiceBtnDev">+ Aggiungi servizio</button>
+      </div>
     </section>
     <section id="devAPI" class="screen">
       <h1>API Monitor</h1>
       <div class="card"><p>Latency media: 120ms</p></div>
     </section>
+    <section id="devGroups" class="screen">
+      <h1>Gruppi Progetto</h1>
+      <div class="card">
+        <strong>Progetto Pagina Web</strong>
+        <p>Task: HTML, CSS, JS<br>Members: Maria, Luca</p>
+      </div>
+    </section>
   </main>
 </div>
 
 <script>
-/* NAV USER */
+// NAV
 const userNavButtons = document.querySelectorAll('#userNav button');
 userNavButtons.forEach(btn=>{
   btn.addEventListener('click', ()=>{
     userNavButtons.forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
     document.querySelectorAll('#mainContent .screen').forEach(s=>s.classList.remove('active'));
-    const screen = document.getElementById(btn.dataset.screen);
-    if(screen) screen.classList.add('active');
+    document.getElementById(btn.dataset.screen).classList.add('active');
   });
 });
-
-/* NAV DEV */
 const devNavButtons = document.querySelectorAll('#devNav button');
 devNavButtons.forEach(btn=>{
   btn.addEventListener('click', ()=>{
     devNavButtons.forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
     document.querySelectorAll('#mainDev .screen').forEach(s=>s.classList.remove('active'));
-    const screen = document.getElementById(btn.dataset.screen);
-    if(screen) screen.classList.add('active');
+    document.getElementById(btn.dataset.screen).classList.add('active');
   });
 });
 
-/* SWITCH PAGE */
+// SWITCH
 document.getElementById('toDev').addEventListener('click', ()=> {
   document.getElementById('userPage').style.display = 'none';
   document.getElementById('devPage').style.display = 'grid';
@@ -259,7 +267,7 @@ document.getElementById('toUser').addEventListener('click', ()=> {
   userNavButtons[0].click();
 });
 
-/* CHAT */
+// CHAT
 const messagesEl = document.getElementById('messages');
 const userInput = document.getElementById('userInput');
 const sendBtn = document.getElementById('sendBtn');
@@ -269,7 +277,6 @@ const messages = [
   { sender:'AI', text:'Ciao! Sono il tuo assistente personale 🌿' },
   { sender:'AI', text:'Posso aiutarti con calendario, gruppi e suggerimenti.' }
 ];
-
 function renderMessages(){
   messagesEl.innerHTML = '';
   messages.forEach(m=>{
@@ -281,18 +288,16 @@ function renderMessages(){
   const last = messagesEl.lastElementChild;
   if(last) last.scrollIntoView({behavior:'auto', block:'end'});
 }
-
 function aiReply(text){
   const t = text.toLowerCase();
   let reply = "Mi dispiace, puoi ripetere?";
   if(t.includes('calendario')) reply = "Hai riunione alle 10:00 e treno alle 17:30.";
   else if(t.includes('routine')) reply = "Routine suggerita: meditazione e blocco focus alle 9:00.";
   else if(t.includes('consiglio')) reply = "Consiglio: pausa di 15 minuti dopo la riunione.";
-  else if(t.includes('collega') || t.includes('integrazione')) reply = "Vai su Integrazioni & Gruppi per aggiungere app o creare gruppi.";
+  else if(t.includes('collega') || t.includes('integrazione')) reply = "Vai su Integrazioni & Gruppi per aggiungere app o vedere gruppi.";
   messages.push({sender:'AI', text:reply});
   renderMessages();
 }
-
 function sendMessage(txt = null){
   const text = txt || (userInput && userInput.value && userInput.value.trim());
   if(!text) return;
@@ -301,7 +306,6 @@ function sendMessage(txt = null){
   renderMessages();
   setTimeout(()=> aiReply(text), 350);
 }
-
 renderMessages();
 sendBtn && sendBtn.addEventListener('click', ()=> sendMessage());
 userInput && userInput.addEventListener('keyup', e=> { if(e.key==='Enter') sendMessage(); });
@@ -310,16 +314,16 @@ suggestions && suggestions.addEventListener('click', (ev)=>{
   if(btn) sendMessage(btn.dataset.msg);
 });
 
-/* INTEGRAZIONI E GRUPPI SIMULATI */
-document.getElementById('connectAppBtn').addEventListener('click', ()=>{
+// SERVIZI
+document.getElementById('addServiceBtnUser').addEventListener('click', ()=>{
   const ul = document.getElementById('connectedApps');
-  const li = document.createElement('li'); li.textContent = 'GitHub (collegato)';
+  const li = document.createElement('li'); li.textContent = 'Slack (collegato)';
   ul.appendChild(li);
 });
-
-document.getElementById('createGroupBtn').addEventListener('click', ()=>{
-  const groups = document.getElementById('groupsList');
-  groups.innerHTML = '<div><strong>Team Progetto</strong><p>Member: Maria, Luca</p></div>';
+document.getElementById('addServiceBtnDev').addEventListener('click', ()=>{
+  const ul = document.getElementById('connectedAppsDev');
+  const li = document.createElement('li'); li.textContent = 'Jira (collegato)';
+  ul.appendChild(li);
 });
 </script>
 </body>
