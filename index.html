@@ -39,14 +39,24 @@
     .nav button {
       background: transparent; color: var(--bianco); border: none;
       padding: 0.8rem; text-align: left; border-radius: 10px; cursor: pointer;
+      transition: 0.2s;
     }
     .nav button.active, .nav button:hover {
-      background: rgba(255, 255, 255, 0.12); transform: translateX(4px);
+      background: rgba(255, 255, 255, 0.15);
+      transform: translateX(4px);
     }
 
-    main { background: var(--chiaro); padding: 1.5rem; overflow: auto; }
-    .screen { display: none; }
+    main {
+      background: var(--chiaro); padding: 1.5rem;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+    .content-scroll {
+      flex: 1; overflow-y: auto; scroll-behavior: smooth;
+    }
+    .screen { display: none; height: 100%; }
     .screen.active { display: block; }
+
     .card {
       background: var(--bianco); border-radius: var(--raggio);
       padding: 1rem 1.2rem; box-shadow: 0 2px 8px var(--ombra);
@@ -67,8 +77,8 @@
     }
     .chat-messages {
       flex: 1; padding: 1rem; display: flex; flex-direction: column;
-      gap: 0.6rem; overflow-y: auto; scroll-behavior: smooth; min-height: 0;
-      background: #fafafa;
+      gap: 0.6rem; overflow-y: auto; background: #fafafa;
+      scroll-behavior: smooth;
     }
     .message {
       max-width: 80%; padding: 0.7rem 1rem; border-radius: var(--raggio);
@@ -81,7 +91,7 @@
     .chat-footer {
       padding: 1rem; border-top: 1px solid #ddd;
       display: flex; flex-direction: column; gap: 0.6rem;
-      background: var(--bianco); flex-shrink: 0;
+      background: var(--bianco);
     }
     .suggestions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
     .suggestions button {
@@ -108,56 +118,54 @@
   </style>
 </head>
 <body>
-  <!-- Pagina User -->
+  <!-- Pagina Base -->
   <div class="app-wrapper" id="userPage">
     <aside class="sidebar">
       <div>
         <h2>AI Routine</h2>
         <nav class="nav" id="userNav">
           <button class="active" data-screen="dashboard">🏠 Dashboard</button>
-          <button data-screen="calendar">📅 Calendar</button>
+          <button data-screen="calendar">📅 Calendario</button>
           <button data-screen="routine">🧠 Routine</button>
+          <button data-screen="groups">👥 Gruppi</button>
           <button data-screen="integrations">🔗 Integrazioni</button>
         </nav>
       </div>
-      <div>
-        <div class="switch-page">
-          <button id="toDev">👨‍💻 Modalità Dev</button>
-        </div>
+      <div class="switch-page">
+        <button id="toDev">👨‍💻 Modalità Dev</button>
       </div>
     </aside>
 
-    <main id="mainContent">
-      <section id="dashboard" class="screen active">
-        <h1>Dashboard Utente</h1>
-        <div class="card"><h3>📅 Agenda</h3><p>10:00 - Meeting</p><p>17:30 - Viaggio</p></div>
-        <div class="card"><h3>🧘 Routine</h3><p>Focus, benessere, equilibrio.</p></div>
-      </section>
-      <section id="calendar" class="screen">
-        <h1>📅 Calendario</h1>
-        <div class="card"><ul><li>10:00 - Riunione</li><li>13:00 - Pranzo</li></ul></div>
-      </section>
-      <section id="routine" class="screen">
-        <h1>🧠 Routine</h1>
-        <div class="card"><ul><li>Meditazione</li><li>Focus time</li></ul></div>
-      </section>
-      <section id="integrations" class="screen">
-        <h1>🔗 Integrazioni</h1>
-        <div class="card">
-          <p>Gestisci app collegate e gruppi condivisi.</p>
-        </div>
-      </section>
+    <main>
+      <div class="content-scroll">
+        <section id="dashboard" class="screen active">
+          <div class="card"><h3>📊 Panoramica giornaliera</h3><p>3 attività completate su 5. Oggi: riunione, allenamento, spesa.</p></div>
+          <div class="card"><h3>🔔 Promemoria</h3><p>Pagamento bolletta domani.</p></div>
+        </section>
+        <section id="calendar" class="screen">
+          <div class="card"><h3>📅 Calendario settimanale</h3><ul><li>Lunedì: Lavoro remoto</li><li>Martedì: Riunione 10:00</li><li>Sabato: libero (tutti disponibili per pranzo!)</li></ul></div>
+        </section>
+        <section id="routine" class="screen">
+          <div class="card"><h3>🧠 Routine giornaliera</h3><ul><li>07:00 - Meditazione</li><li>08:00 - Focus</li><li>17:30 - Allenamento</li></ul></div>
+        </section>
+        <section id="groups" class="screen">
+          <div class="card"><h3>👪 Gruppo Famiglia</h3><p>Tutti sono liberi sabato — suggerisco di organizzare un pranzo insieme 🍝</p></div>
+          <div class="card"><h3>➕ Crea nuovo gruppo</h3><p>Puoi aggiungere membri, impostare eventi e sincronizzare calendari condivisi.</p></div>
+        </section>
+        <section id="integrations" class="screen">
+          <div class="card"><h3>🔗 Integrazioni attive</h3><ul><li>Google Calendar ✅</li><li>WhatsApp Connect ⚙️</li><li>Drive Share ✅</li></ul></div>
+        </section>
+      </div>
     </main>
 
-    <!-- Chat comune -->
     <section class="chat">
-      <div class="chat-header">Assistente AI</div>
+      <div class="chat-header">Assistente Personale</div>
       <div class="chat-messages" id="messages"></div>
       <div class="chat-footer">
         <div class="suggestions" id="suggestions">
           <button data-msg="mostrami il calendario">📅 calendario</button>
-          <button data-msg="migliora la mia routine">🧠 routine</button>
-          <button data-msg="dammi un consiglio">✨ consiglio</button>
+          <button data-msg="come migliorare la routine">🧘 routine</button>
+          <button data-msg="eventi in famiglia">👪 famiglia</button>
         </div>
         <div class="input-row">
           <input id="userInput" type="text" placeholder="Scrivi o tocca un suggerimento..." />
@@ -176,28 +184,31 @@
           <button class="active" data-screen="overview">🏗 Overview</button>
           <button data-screen="github">🐙 GitHub</button>
           <button data-screen="api">🔌 API</button>
+          <button data-screen="groupsDev">👥 Team</button>
         </nav>
       </div>
-      <div>
-        <div class="switch-page">
-          <button id="toUser">🏠 Modalità Base</button>
-        </div>
+      <div class="switch-page">
+        <button id="toUser">🏠 Modalità Base</button>
       </div>
     </aside>
 
-    <main id="mainDev">
-      <section id="overview" class="screen active">
-        <h1>Dashboard Developer</h1>
-        <div class="card"><h3>Build</h3><p>Ultima: 09:12 ✅</p></div>
-      </section>
-      <section id="github" class="screen">
-        <h1>GitHub</h1>
-        <div class="card"><p>PR aperte: 2 · Issue: 3</p></div>
-      </section>
-      <section id="api" class="screen">
-        <h1>Monitor API</h1>
-        <div class="card"><p>Latency media: 120ms</p></div>
-      </section>
+    <main>
+      <div class="content-scroll">
+        <section id="overview" class="screen active">
+          <div class="card"><h3>📦 Build Status</h3><p>Ultima build completata alle 09:12 ✅</p></div>
+          <div class="card"><h3>⚙️ Ambiente</h3><p>Node v20, Next.js 15, Database connesso.</p></div>
+        </section>
+        <section id="github" class="screen">
+          <div class="card"><h3>🐙 Repo principale</h3><p>Branch: <b>main</b> · Pull Request aperte: 2 · Issue: 3</p></div>
+        </section>
+        <section id="api" class="screen">
+          <div class="card"><h3>🔌 Monitor API</h3><p>Latency media: 120ms · Status: OK · Endpoint attivi: /login, /sync, /groups</p></div>
+        </section>
+        <section id="groupsDev" class="screen">
+          <div class="card"><h3>👨‍💻 Team Progetto Pagina Web</h3><ul><li>Anna – UI/UX</li><li>Marco – Backend</li><li>Sara – Frontend</li></ul><p>Task: <b>Homepage responsive</b> in progress, <b>API Auth</b> completata ✅</p></div>
+          <div class="card"><h3>➕ Crea nuovo team</h3><p>Assegna ruoli, task e integrazioni GitHub automatiche.</p></div>
+        </section>
+      </div>
     </main>
 
     <section class="chat">
@@ -205,9 +216,9 @@
       <div class="chat-messages" id="messagesDev"></div>
       <div class="chat-footer">
         <div class="suggestions" id="suggestionsDev">
-          <button data-msg="mostrami le build">🏗 build</button>
-          <button data-msg="stato api">🔌 api</button>
-          <button data-msg="repo github">🐙 github</button>
+          <button data-msg="stato build">🏗 build</button>
+          <button data-msg="api attive">🔌 api</button>
+          <button data-msg="team progetto">👥 team</button>
         </div>
         <div class="input-row">
           <input id="devInput" type="text" placeholder="Scrivi o tocca un suggerimento..." />
@@ -218,37 +229,31 @@
   </div>
 
   <script>
-    // --- NAVIGAZIONE BASE ---
-    document.querySelectorAll('#userNav button').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('#userNav button').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        document.querySelectorAll('#mainContent .screen').forEach(s => s.classList.remove('active'));
-        document.getElementById(btn.dataset.screen).classList.add('active');
+    // NAV BASE
+    function setupNav(navId, mainId) {
+      document.querySelectorAll(`#${navId} button`).forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll(`#${navId} button`).forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          document.querySelectorAll(`#${mainId} .screen`).forEach(s => s.classList.remove("active"));
+          document.getElementById(btn.dataset.screen).classList.add("active");
+        });
       });
+    }
+    setupNav("userNav", "userPage");
+    setupNav("devNav", "devPage");
+
+    // SWITCH PAGINE
+    document.getElementById("toDev").addEventListener("click", () => {
+      document.getElementById("userPage").style.display = "none";
+      document.getElementById("devPage").style.display = "grid";
+    });
+    document.getElementById("toUser").addEventListener("click", () => {
+      document.getElementById("devPage").style.display = "none";
+      document.getElementById("userPage").style.display = "grid";
     });
 
-    // --- NAVIGAZIONE DEV ---
-    document.querySelectorAll('#devNav button').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('#devNav button').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        document.querySelectorAll('#mainDev .screen').forEach(s => s.classList.remove('active'));
-        document.getElementById(btn.dataset.screen).classList.add('active');
-      });
-    });
-
-    // --- SWITCH PAGINE ---
-    document.getElementById('toDev').addEventListener('click', () => {
-      document.getElementById('userPage').style.display = 'none';
-      document.getElementById('devPage').style.display = 'grid';
-    });
-    document.getElementById('toUser').addEventListener('click', () => {
-      document.getElementById('devPage').style.display = 'none';
-      document.getElementById('userPage').style.display = 'grid';
-    });
-
-    // --- CHAT BASE ---
+    // CHAT
     function setupChat(msgContainerId, inputId, sendId, sugId, mode="user") {
       const container = document.getElementById(msgContainerId);
       const input = document.getElementById(inputId);
@@ -264,21 +269,20 @@
           d.textContent = m.text;
           container.appendChild(d);
         });
-        const last = container.lastElementChild;
-        if (last) last.scrollIntoView({behavior:'auto', block:'end'});
+        container.scrollTop = container.scrollHeight;
       }
 
       function aiReply(t) {
         const text = t.toLowerCase();
-        let reply = "Non ho capito, puoi ripetere?";
+        let reply = "Non sono sicuro di aver capito, puoi ripetere?";
         if (mode === "user") {
-          if (text.includes("calendario")) reply = "Ecco il tuo calendario aggiornato.";
-          else if (text.includes("routine")) reply = "Suggerimento: dedica 10 minuti al focus mattutino.";
-          else if (text.includes("consiglio")) reply = "Prova a fare una breve pausa dopo ogni task importante.";
+          if (text.includes("calendario")) reply = "Hai un weekend libero, potresti pianificare un pranzo con la famiglia 🍝";
+          else if (text.includes("routine")) reply = "Prova a iniziare la giornata con 10 minuti di meditazione.";
+          else if (text.includes("famiglia")) reply = "Tutti disponibili sabato! Pranzo suggerito alle 12:30.";
         } else {
-          if (text.includes("build")) reply = "Ultima build completata senza errori ✅";
-          else if (text.includes("api")) reply = "API online con 120ms di media.";
-          else if (text.includes("github")) reply = "Ci sono 2 pull request aperte su main.";
+          if (text.includes("build")) reply = "L’ultima build è riuscita senza errori ✅";
+          else if (text.includes("api")) reply = "3 endpoint attivi: /login, /sync, /groups. Latency media 120ms.";
+          else if (text.includes("team")) reply = "Marco ha completato l’API Auth, Sara sta lavorando alla homepage responsive.";
         }
         msgs.push({sender:"AI", text:reply});
         render();
