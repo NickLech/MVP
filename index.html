@@ -18,7 +18,7 @@
       font-family: "Segoe UI", Arial, sans-serif;
       background: linear-gradient(135deg, var(--verde) 20%, var(--blu) 80%);
       margin: 0;
-      height: 100vh;
+      min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -78,13 +78,7 @@
       transform: translateX(4px);
     }
 
-    .sidebar-footer {
-      font-size: 0.8rem;
-      text-align: center;
-      opacity: 0.8;
-    }
-
-    /* Main area */
+    /* Main */
     main {
       background: var(--chiaro);
       padding: 1.5rem;
@@ -92,8 +86,14 @@
       position: relative;
     }
 
-    .screen { display: none; animation: fadeIn 0.4s ease; }
-    .screen.active { display: block; }
+    .screen {
+      display: none;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .screen.active {
+      display: block;
+    }
 
     .card {
       background: var(--bianco);
@@ -104,26 +104,13 @@
       margin-bottom: 1rem;
     }
 
-    .card:hover { transform: scale(1.02); }
-    .card h3 { margin-top: 0; color: var(--blu); }
-
-    .chart {
-      width: 100%;
-      height: 160px;
-      background: linear-gradient(to top, var(--blu) 20%, var(--verde) 80%);
-      border-radius: var(--raggio);
-      margin: 1rem 0;
-      position: relative;
-      overflow: hidden;
+    .card:hover {
+      transform: scale(1.02);
     }
 
-    .chart::after {
-      content: "";
-      position: absolute;
-      width: 100%;
-      height: 50%;
-      background: rgba(255, 255, 255, 0.3);
-      clip-path: polygon(0 100%, 10% 70%, 25% 85%, 40% 40%, 55% 75%, 70% 50%, 90% 65%, 100% 45%, 100% 100%);
+    .card h3 {
+      margin-top: 0;
+      color: var(--blu);
     }
 
     /* Chat */
@@ -149,6 +136,8 @@
       display: flex;
       flex-direction: column;
       gap: 0.6rem;
+      height: 100%;
+      scroll-behavior: smooth;
     }
 
     .message {
@@ -158,6 +147,7 @@
       box-shadow: 0 2px 6px var(--ombra);
       animation: slideUp 0.3s ease;
       line-height: 1.4;
+      word-wrap: break-word;
     }
 
     .message.AI {
@@ -235,72 +225,110 @@
       transform: scale(1.03);
     }
 
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Scrollbar */
     main::-webkit-scrollbar,
     .chat-messages::-webkit-scrollbar {
       width: 8px;
     }
+
     main::-webkit-scrollbar-thumb,
     .chat-messages::-webkit-scrollbar-thumb {
       background: var(--blu);
       border-radius: 4px;
     }
+
+    /* Switch page button */
+    .switch-page {
+      text-align: center;
+      margin-top: 1rem;
+    }
+
+    .switch-page button {
+      background: #fff;
+      color: var(--blu);
+      border: 1px solid #fff;
+      border-radius: var(--raggio);
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .switch-page button:hover {
+      background: var(--blu);
+      color: var(--bianco);
+    }
   </style>
 </head>
 <body>
-  <div class="app-wrapper">
-    <!-- Sidebar -->
+  <div class="app-wrapper" id="userPage">
     <aside class="sidebar">
       <div>
         <h2>AI Routine</h2>
         <nav class="nav">
-          <button class="active" data-screen="dashboard-base">🏠 Dashboard</button>
+          <button class="active" data-screen="dashboard">🏠 Dashboard</button>
           <button data-screen="calendar">📅 Calendar</button>
           <button data-screen="routine">🧠 Routine</button>
-          <button data-screen="insights">✨ AI Insights</button>
-          <button id="switchUser">👥 Tipo Utente: Base</button>
+          <button data-screen="insights">✨ Insights</button>
+          <button data-screen="integrations">🔗 Integrazioni & Gruppi</button>
         </nav>
       </div>
-      <div class="sidebar-footer">© 2025 AI Manager</div>
+      <div class="switch-page">
+        <button onclick="switchPage('developer')">👨‍💻 Dev Mode</button>
+      </div>
     </aside>
 
-    <!-- Main -->
     <main id="main-content">
-      <!-- Dashboard Base -->
-      <section id="dashboard-base" class="screen active">
-        <h1>Buongiorno, Alessandro 👋</h1>
-        <div class="card"><h3>📅 Agenda</h3><p>Yoga alle <strong>08:30</strong> – Allenamento leggero</p><p>Call con Marco <strong>15:00</strong></p></div>
-        <div class="card"><h3>💬 Gruppo Famiglia</h3><p>Compleanno mamma sabato 🎂</p><p>Lista spesa condivisa aggiornata.</p></div>
-        <div class="card"><h3>🧘 Benessere</h3><p>Promemoria: pausa relax alle 17:00 🌿</p></div>
-      </section>
-
-      <!-- Dashboard Dev -->
-      <section id="dashboard-dev" class="screen">
-        <h1>Benvenuto, Dev 👨‍💻</h1>
-        <div class="card"><h3>💻 GitHub</h3><p>3 issue aperte · 2 PR in review</p><p>Progetto “AI Routine” – commit previsti oggi.</p></div>
-        <div class="card"><h3>🧠 Focus Time</h3><p>Blocca 9:00–11:00 per deep work</p><p>AI suggerisce: “Concludi feature calendar sync”.</p></div>
-        <div class="card"><h3>🧩 Team Sync</h3><p>Riunione dev alle 10:30</p><p>Drive aggiornato da Luca 📁</p></div>
+      <section id="dashboard" class="screen active">
+        <h1>Benvenuto, Alessandro 👋</h1>
+        <div class="card"><h3>📅 Agenda</h3><p>10:00 - Riunione Progetto</p><p>17:30 - Treno Milano</p></div>
+        <div class="card"><h3>🧠 Routine</h3><p>Meditazione mattutina completata ✔️</p></div>
       </section>
 
       <section id="calendar" class="screen">
-        <h1>📅 Calendario Giornaliero</h1>
-        <div class="card"><h3>Eventi di oggi</h3><ul><li>10:00 - Call di allineamento</li><li>13:00 - Pranzo</li><li>17:00 - Allenamento</li></ul></div>
+        <h1>📅 Calendario</h1>
+        <div class="card"><ul><li>10:00 - Team meeting</li><li>13:00 - Pranzo</li></ul></div>
       </section>
 
       <section id="routine" class="screen">
         <h1>🧠 Routine</h1>
-        <div class="card"><h3>Oggi</h3><ul><li>☀️ Meditazione</li><li>📖 Lettura</li><li>🏋️ Allenamento</li></ul></div>
+        <div class="card"><ul><li>☀️ Meditazione</li><li>💻 Revisione obiettivi</li></ul></div>
       </section>
 
       <section id="insights" class="screen">
-        <h1>✨ AI Insights</h1>
-        <div class="card"><p>“Hai una giornata intensa: prova una pausa di 15 minuti dopo la riunione per migliorare la concentrazione.”</p></div>
+        <h1>✨ Consigli AI</h1>
+        <div class="card"><p>Hai una giornata intensa: prenditi 15 minuti di pausa dopo la riunione ☕</p></div>
+      </section>
+
+      <section id="integrations" class="screen">
+        <h1>🔗 Integrazioni & Gruppi</h1>
+        <div class="card">
+          <h3>Collega le tue app</h3>
+          <ul>
+            <li>✅ Google Calendar</li>
+            <li>⚙️ GitHub</li>
+            <li>⚙️ WhatsApp</li>
+            <li>⚙️ Google Drive</li>
+          </ul>
+          <button class="send">+ Aggiungi integrazione</button>
+        </div>
+        <div class="card">
+          <h3>Gestione Gruppi</h3>
+          <p>Crea o unisciti a un gruppo di lavoro o famiglia:</p>
+          <button class="send">+ Crea gruppo</button>
+        </div>
       </section>
     </main>
 
-    <!-- Chat -->
     <section class="chat">
       <div class="chat-header">Assistente AI</div>
       <div class="chat-messages" id="messages"></div>
@@ -309,7 +337,7 @@
           <button data-msg="mostrami il calendario">📅 calendario</button>
           <button data-msg="migliora la mia routine">🧠 routine</button>
           <button data-msg="dammi un consiglio">✨ consiglio</button>
-          <button data-msg="riepilogo giornata">📊 riepilogo</button>
+          <button data-msg="collega app">🔗 integrazioni</button>
         </div>
         <div class="input-row">
           <input id="userInput" type="text" placeholder="Scrivi o tocca un suggerimento..." />
@@ -319,19 +347,56 @@
     </section>
   </div>
 
+  <!-- Pagina Developer -->
+  <div class="app-wrapper" id="devPage" style="display:none;">
+    <aside class="sidebar">
+      <div>
+        <h2>AI Dev Hub</h2>
+        <nav class="nav">
+          <button class="active" data-screen="dashboard-dev">🏗️ Overview</button>
+          <button data-screen="github">🐙 GitHub</button>
+          <button data-screen="api">🔌 API Monitor</button>
+          <button data-screen="ai-dev">🤖 AI Tools</button>
+        </nav>
+      </div>
+      <div class="switch-page">
+        <button onclick="switchPage('user')">🏠 Utente Base</button>
+      </div>
+    </aside>
+
+    <main>
+      <section id="dashboard-dev" class="screen active">
+        <h1>Developer Dashboard</h1>
+        <div class="card"><h3>⚙️ Stato build</h3><p>Ultima compilazione: 09:12 ✅</p></div>
+        <div class="card"><h3>📦 Repositories collegati</h3><ul><li>frontend-ai-routine</li><li>backend-api-manager</li></ul></div>
+      </section>
+
+      <section id="github" class="screen">
+        <h1>🐙 GitHub Activity</h1>
+        <div class="card"><p>Ultime issue aggiornate e PR recenti.</p></div>
+      </section>
+
+      <section id="api" class="screen">
+        <h1>🔌 API Monitor</h1>
+        <div class="card"><p>Status API: <strong>Online</strong></p><p>Latency media: 142ms</p></div>
+      </section>
+
+      <section id="ai-dev" class="screen">
+        <h1>🤖 AI Tools</h1>
+        <div class="card"><p>Testa prompt e modelli su dati reali.</p></div>
+      </section>
+    </main>
+  </div>
+
   <script>
     const messagesContainer = document.getElementById('messages');
     const userInput = document.getElementById('userInput');
     const sendBtn = document.getElementById('sendBtn');
     const suggestions = document.querySelectorAll('#suggestions button');
-    const navButtons = document.querySelectorAll('.nav button[data-screen]');
-    const screens = document.querySelectorAll('.screen');
-    const switchUser = document.getElementById('switchUser');
 
-    let userType = "base";
     let messages = [
-      { sender: 'AI', text: 'Ciao Alessandro! Sono il tuo assistente personale 🌿' },
-      { sender: 'AI', text: 'Posso mostrarti la giornata, analizzare la routine o darti consigli personalizzati.' },
+      { sender: 'AI', text: 'Ciao Alessandro! Sono il tuo assistente 🌿' },
+      { sender: 'AI', text: 'Posso mostrarti calendario, routine o gestire integrazioni.' }
     ];
 
     function renderMessages() {
@@ -347,38 +412,14 @@
 
     function aiRespond(input) {
       const lower = input.toLowerCase();
-      let response = "Non sono sicuro di aver capito. Puoi riformulare?";
-      let screen = null;
-
-      if (lower.includes('calendario')) {
-        response = "Ecco i tuoi eventi di oggi: call alle 10:00, pranzo alle 13:00, allenamento alle 17:00.";
-        screen = "calendar";
-      } else if (lower.includes('routine')) {
-        response = userType === "base"
-          ? "La tua routine oggi prevede meditazione e lettura serale."
-          : "Per oggi, il focus è completare il task di sincronizzazione calendario.";
-        screen = "routine";
-      } else if (lower.includes('consiglio') || lower.includes('ai')) {
-        response = userType === "base"
-          ? "Suggerimento AI: prenditi una pausa di 15 minuti dopo il pranzo 🍃"
-          : "Suggerimento AI Dev: lavora in blocchi da 90 minuti per migliorare la produttività 🔧";
-        screen = "insights";
-      } else if (lower.includes('riepilogo')) {
-        response = userType === "base"
-          ? "Oggi hai yoga, call con Marco e spesa condivisa aggiornata."
-          : "3 issue aperte, 1 meeting e suggerimento focus su deep work.";
-        screen = userType === "base" ? "dashboard-base" : "dashboard-dev";
-      }
+      let response = "Mi dispiace, non ho capito.";
+      if (lower.includes('calendario')) response = "Oggi: riunione alle 10 e treno alle 17:30.";
+      else if (lower.includes('routine')) response = "La tua routine include meditazione e allenamento.";
+      else if (lower.includes('consiglio')) response = "Suggerimento AI: pianifica 15 minuti di pausa post-riunione.";
+      else if (lower.includes('collega') || lower.includes('app')) response = "Puoi collegare Google Calendar, GitHub o WhatsApp nella sezione integrazioni.";
 
       messages.push({ sender: 'AI', text: response });
       renderMessages();
-
-      if (screen) {
-        navButtons.forEach(b => b.classList.remove('active'));
-        screens.forEach(s => s.classList.remove('active'));
-        document.getElementById(screen).classList.add('active');
-        document.querySelector(`.nav button[data-screen="${screen}"]`)?.classList.add('active');
-      }
     }
 
     function sendMessage(text = null) {
@@ -394,24 +435,10 @@
     userInput.addEventListener('keyup', (e) => { if (e.key === 'Enter') sendMessage(); });
     suggestions.forEach(btn => btn.addEventListener('click', () => sendMessage(btn.dataset.msg)));
 
-    navButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        navButtons.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        screens.forEach(sec => sec.classList.remove('active'));
-        document.getElementById(btn.dataset.screen).classList.add('active');
-      });
-    });
-
-    // Switch tra dashboard base e dev
-    switchUser.addEventListener('click', () => {
-      userType = userType === "base" ? "dev" : "base";
-      switchUser.textContent = userType === "base" ? "👥 Tipo Utente: Base" : "👥 Tipo Utente: Dev";
-      document.getElementById('dashboard-base').classList.toggle('active', userType === "base");
-      document.getElementById('dashboard-dev').classList.toggle('active', userType === "dev");
-      messages.push({ sender: 'AI', text: userType === "base" ? "Modalità Base attiva 🌿" : "Modalità Dev attiva 💻" });
-      renderMessages();
-    });
+    function switchPage(mode) {
+      document.getElementById('userPage').style.display = mode === 'user' ? 'grid' : 'none';
+      document.getElementById('devPage').style.display = mode === 'developer' ? 'grid' : 'none';
+    }
 
     renderMessages();
   </script>
