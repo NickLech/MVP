@@ -78,6 +78,12 @@
       transform: translateX(4px);
     }
 
+    .sidebar-footer {
+      font-size: 0.8rem;
+      text-align: center;
+      opacity: 0.8;
+    }
+
     /* Main area */
     main {
       background: var(--chiaro);
@@ -99,7 +105,6 @@
     }
 
     .card:hover { transform: scale(1.02); }
-
     .card h3 { margin-top: 0; color: var(--blu); }
 
     .chart {
@@ -251,11 +256,11 @@
       <div>
         <h2>AI Routine</h2>
         <nav class="nav">
-          <button class="active" data-screen="dashboard">🏠 Dashboard</button>
+          <button class="active" data-screen="dashboard-base">🏠 Dashboard</button>
           <button data-screen="calendar">📅 Calendar</button>
-          <button data-screen="finance">💰 Finanze</button>
           <button data-screen="routine">🧠 Routine</button>
           <button data-screen="insights">✨ AI Insights</button>
+          <button id="switchUser">👥 Tipo Utente: Base</button>
         </nav>
       </div>
       <div class="sidebar-footer">© 2025 AI Manager</div>
@@ -263,31 +268,35 @@
 
     <!-- Main -->
     <main id="main-content">
-      <section id="dashboard" class="screen active">
-        <h1>Buongiorno, Alessandro Casagrande 👋</h1>
-        <div class="card"><h3>📅 Agenda</h3><p>Riunione alle <strong>10:00</strong> – Team Progetto</p><p>Treno Milano <strong>17:30</strong></p></div>
-        <div class="card"><h3>💰 Finanze</h3><p>Saldo: <strong>2.500 €</strong></p><p>Budget “Cene fuori” superato +20%</p></div>
-        <div class="card"><h3>🧠 Routine</h3><p>Promemoria pre-riunione e check-in treno da impostare.</p></div>
+      <!-- Dashboard Base -->
+      <section id="dashboard-base" class="screen active">
+        <h1>Buongiorno, Alessandro 👋</h1>
+        <div class="card"><h3>📅 Agenda</h3><p>Yoga alle <strong>08:30</strong> – Allenamento leggero</p><p>Call con Marco <strong>15:00</strong></p></div>
+        <div class="card"><h3>💬 Gruppo Famiglia</h3><p>Compleanno mamma sabato 🎂</p><p>Lista spesa condivisa aggiornata.</p></div>
+        <div class="card"><h3>🧘 Benessere</h3><p>Promemoria: pausa relax alle 17:00 🌿</p></div>
+      </section>
+
+      <!-- Dashboard Dev -->
+      <section id="dashboard-dev" class="screen">
+        <h1>Benvenuto, Dev 👨‍💻</h1>
+        <div class="card"><h3>💻 GitHub</h3><p>3 issue aperte · 2 PR in review</p><p>Progetto “AI Routine” – commit previsti oggi.</p></div>
+        <div class="card"><h3>🧠 Focus Time</h3><p>Blocca 9:00–11:00 per deep work</p><p>AI suggerisce: “Concludi feature calendar sync”.</p></div>
+        <div class="card"><h3>🧩 Team Sync</h3><p>Riunione dev alle 10:30</p><p>Drive aggiornato da Luca 📁</p></div>
       </section>
 
       <section id="calendar" class="screen">
-        <h1>📅 Google Calendar</h1>
-        <div class="card"><h3>Eventi di oggi</h3><ul><li>10:00 - Riunione team</li><li>13:00 - Pranzo partner</li><li>17:30 - Treno Milano</li></ul></div>
-      </section>
-
-      <section id="finance" class="screen">
-        <h1>💰 Finanze</h1>
-        <div class="card"><h3>Andamento spese</h3><div class="chart"></div><p>Media mensile: 1.200 €</p></div>
+        <h1>📅 Calendario Giornaliero</h1>
+        <div class="card"><h3>Eventi di oggi</h3><ul><li>10:00 - Call di allineamento</li><li>13:00 - Pranzo</li><li>17:00 - Allenamento</li></ul></div>
       </section>
 
       <section id="routine" class="screen">
         <h1>🧠 Routine</h1>
-        <div class="card"><h3>Oggi</h3><ul><li>☀️ Meditazione</li><li>💻 Revisione obiettivi</li><li>🏋️ Allenamento</li></ul></div>
+        <div class="card"><h3>Oggi</h3><ul><li>☀️ Meditazione</li><li>📖 Lettura</li><li>🏋️ Allenamento</li></ul></div>
       </section>
 
       <section id="insights" class="screen">
         <h1>✨ AI Insights</h1>
-        <div class="card"><p>“Hai una giornata intensa, potresti pianificare 15’ di pausa dopo la riunione.”</p></div>
+        <div class="card"><p>“Hai una giornata intensa: prova una pausa di 15 minuti dopo la riunione per migliorare la concentrazione.”</p></div>
       </section>
     </main>
 
@@ -298,7 +307,6 @@
       <div class="chat-footer">
         <div class="suggestions" id="suggestions">
           <button data-msg="mostrami il calendario">📅 calendario</button>
-          <button data-msg="analizza le mie finanze">💰 finanze</button>
           <button data-msg="migliora la mia routine">🧠 routine</button>
           <button data-msg="dammi un consiglio">✨ consiglio</button>
           <button data-msg="riepilogo giornata">📊 riepilogo</button>
@@ -312,18 +320,18 @@
   </div>
 
   <script>
-    // CHAT + NAVIGAZIONE
     const messagesContainer = document.getElementById('messages');
     const userInput = document.getElementById('userInput');
     const sendBtn = document.getElementById('sendBtn');
     const suggestions = document.querySelectorAll('#suggestions button');
-    const navButtons = document.querySelectorAll('.nav button');
+    const navButtons = document.querySelectorAll('.nav button[data-screen]');
     const screens = document.querySelectorAll('.screen');
+    const switchUser = document.getElementById('switchUser');
 
+    let userType = "base";
     let messages = [
       { sender: 'AI', text: 'Ciao Alessandro! Sono il tuo assistente personale 🌿' },
-      { sender: 'AI', text: 'Posso mostrarti la giornata, analizzare le spese o ottimizzare la routine.' },
-      { sender: 'AI', text: 'Scegli un suggerimento qui sotto per iniziare 👇' }
+      { sender: 'AI', text: 'Posso mostrarti la giornata, analizzare la routine o darti consigli personalizzati.' },
     ];
 
     function renderMessages() {
@@ -339,41 +347,37 @@
 
     function aiRespond(input) {
       const lower = input.toLowerCase();
-      let response = "Mi dispiace, puoi riformulare?";
+      let response = "Non sono sicuro di aver capito. Puoi riformulare?";
       let screen = null;
 
       if (lower.includes('calendario')) {
-        response = "Ecco i tuoi eventi di oggi: riunione alle 10:00, pranzo alle 13:00, treno alle 17:30.";
+        response = "Ecco i tuoi eventi di oggi: call alle 10:00, pranzo alle 13:00, allenamento alle 17:00.";
         screen = "calendar";
-      } else if (lower.includes('finanze')) {
-        response = "Hai un saldo di 2.500 € e un eccesso del 20% sulle spese per cene fuori. Vuoi un piano di risparmio?";
-        screen = "finance";
       } else if (lower.includes('routine')) {
-        response = "La tua routine di oggi prevede meditazione, revisione obiettivi e allenamento serale.";
+        response = userType === "base"
+          ? "La tua routine oggi prevede meditazione e lettura serale."
+          : "Per oggi, il focus è completare il task di sincronizzazione calendario.";
         screen = "routine";
-      } else if (lower.includes('riepilogo')) {
-        response = "Oggi hai tre impegni principali. Ti consiglio di lasciare 30 minuti di pausa tra riunione e viaggio.";
-        screen = "dashboard";
       } else if (lower.includes('consiglio') || lower.includes('ai')) {
-        response = "Suggerimento AI: riduci il multitasking nelle prime ore del mattino per aumentare il focus del 25%.";
+        response = userType === "base"
+          ? "Suggerimento AI: prenditi una pausa di 15 minuti dopo il pranzo 🍃"
+          : "Suggerimento AI Dev: lavora in blocchi da 90 minuti per migliorare la produttività 🔧";
         screen = "insights";
-      } else if (lower.includes('ciao') || lower.includes('hey')) {
-        response = "Ciao! Come posso aiutarti oggi?";
-      } else if (lower.includes('grazie')) {
-        response = "È un piacere! 💫";
-      } else if (lower.includes('ok')) {
-        response = "Perfetto, procediamo!";
+      } else if (lower.includes('riepilogo')) {
+        response = userType === "base"
+          ? "Oggi hai yoga, call con Marco e spesa condivisa aggiornata."
+          : "3 issue aperte, 1 meeting e suggerimento focus su deep work.";
+        screen = userType === "base" ? "dashboard-base" : "dashboard-dev";
       }
 
       messages.push({ sender: 'AI', text: response });
       renderMessages();
 
-      // cambia schermata se rilevato contesto
       if (screen) {
         navButtons.forEach(b => b.classList.remove('active'));
         screens.forEach(s => s.classList.remove('active'));
-        document.querySelector(`.nav button[data-screen="${screen}"]`).classList.add('active');
         document.getElementById(screen).classList.add('active');
+        document.querySelector(`.nav button[data-screen="${screen}"]`)?.classList.add('active');
       }
     }
 
@@ -390,7 +394,6 @@
     userInput.addEventListener('keyup', (e) => { if (e.key === 'Enter') sendMessage(); });
     suggestions.forEach(btn => btn.addEventListener('click', () => sendMessage(btn.dataset.msg)));
 
-    // NAVIGAZIONE
     navButtons.forEach(btn => {
       btn.addEventListener('click', () => {
         navButtons.forEach(b => b.classList.remove('active'));
@@ -398,6 +401,16 @@
         screens.forEach(sec => sec.classList.remove('active'));
         document.getElementById(btn.dataset.screen).classList.add('active');
       });
+    });
+
+    // Switch tra dashboard base e dev
+    switchUser.addEventListener('click', () => {
+      userType = userType === "base" ? "dev" : "base";
+      switchUser.textContent = userType === "base" ? "👥 Tipo Utente: Base" : "👥 Tipo Utente: Dev";
+      document.getElementById('dashboard-base').classList.toggle('active', userType === "base");
+      document.getElementById('dashboard-dev').classList.toggle('active', userType === "dev");
+      messages.push({ sender: 'AI', text: userType === "base" ? "Modalità Base attiva 🌿" : "Modalità Dev attiva 💻" });
+      renderMessages();
     });
 
     renderMessages();
