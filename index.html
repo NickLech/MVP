@@ -4,264 +4,277 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AI Routine Manager MVP</title>
+  
+
+
   <style>
-    :root {
-      --verde: #064420;
-      --blu: #0a4d68;
-      --chiaro: #f0f8f8;
-      --bianco: #ffffff;
-      --ombra: rgba(0, 0, 0, 0.15);
-      --raggio: 14px;
-    }
+  :root {
+    --verde: #064420;
+    --blu: #0a4d68;
+    --chiaro: #f0f8f8;
+    --bianco: #ffffff;
+    --ombra: rgba(0, 0, 0, 0.15);
+    --raggio: 14px;
+  }
 
-    body {
-      font-family: "Segoe UI", Arial, sans-serif;
-      background: linear-gradient(135deg, var(--verde) 20%, var(--blu) 80%);
-      margin: 0;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #222;
-    }
+  html, body {
+    height: 100%;
+    margin: 0;
+  }
 
-    .app-wrapper {
-      width: 95%;
-      max-width: 1250px;
-      height: 90vh;
-      background: var(--bianco);
-      border-radius: var(--raggio);
-      display: grid;
-      grid-template-columns: 220px 1fr 400px;
-      box-shadow: 0 10px 30px var(--ombra);
-      overflow: hidden;
-      animation: fadeIn 0.8s ease;
-    }
+  body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: linear-gradient(135deg, var(--verde) 20%, var(--blu) 80%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #222;
+    overflow: hidden; /* evita che la pagina intera scorra */
+  }
 
-    .sidebar {
-      background: linear-gradient(to bottom, var(--verde), var(--blu));
-      color: var(--bianco);
-      padding: 1.5rem 1rem;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
+  .app-wrapper {
+    width: 95%;
+    max-width: 1250px;
+    height: 90vh;
+    background: var(--bianco);
+    border-radius: var(--raggio);
+    display: grid;
+    grid-template-columns: 220px 1fr 400px;
+    box-shadow: 0 10px 30px var(--ombra);
+    overflow: hidden;
+    animation: fadeIn 0.8s ease;
+  }
 
-    .sidebar h2 {
-      font-size: 1.3rem;
-      margin-bottom: 2rem;
-      text-align: center;
-    }
+  .sidebar {
+    background: linear-gradient(to bottom, var(--verde), var(--blu));
+    color: var(--bianco);
+    padding: 1.5rem 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
 
-    .nav {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
+  .sidebar h2 {
+    font-size: 1.3rem;
+    margin-bottom: 2rem;
+    text-align: center;
+  }
 
-    .nav button {
-      background: transparent;
-      color: var(--bianco);
-      border: none;
-      padding: 0.8rem;
-      text-align: left;
-      border-radius: var(--raggio);
-      cursor: pointer;
-      transition: all 0.3s;
-      font-size: 1rem;
-    }
+  .nav {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
 
-    .nav button:hover,
-    .nav button.active {
-      background: rgba(255, 255, 255, 0.2);
-      transform: translateX(4px);
-    }
+  .nav button {
+    background: transparent;
+    color: var(--bianco);
+    border: none;
+    padding: 0.8rem;
+    text-align: left;
+    border-radius: var(--raggio);
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 1rem;
+  }
 
-    main {
-      background: var(--chiaro);
-      padding: 1.5rem;
-      overflow-y: auto;
-      position: relative;
-    }
+  .nav button:hover,
+  .nav button.active {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateX(4px);
+  }
 
-    .screen {
-      display: none;
-      animation: fadeIn 0.4s ease;
-    }
+  main {
+    background: var(--chiaro);
+    padding: 1.5rem;
+    overflow-y: auto;
+    position: relative;
+  }
 
-    .screen.active {
-      display: block;
-    }
+  .screen {
+    display: none;
+    animation: fadeIn 0.4s ease;
+  }
 
-    .card {
-      background: var(--bianco);
-      border-radius: var(--raggio);
-      padding: 1rem 1.2rem;
-      box-shadow: 0 2px 8px var(--ombra);
-      transition: transform 0.2s ease;
-      margin-bottom: 1rem;
-    }
+  .screen.active {
+    display: block;
+  }
 
-    .card:hover {
-      transform: scale(1.02);
-    }
+  .card {
+    background: var(--bianco);
+    border-radius: var(--raggio);
+    padding: 1rem 1.2rem;
+    box-shadow: 0 2px 8px var(--ombra);
+    transition: transform 0.2s ease;
+    margin-bottom: 1rem;
+  }
 
-    .card h3 {
-      margin-top: 0;
-      color: var(--blu);
-    }
+  .card:hover {
+    transform: scale(1.02);
+  }
 
-    .chat {
-      display: flex;
-      flex-direction: column;
-      border-left: 1px solid #ddd;
-      background: #f9f9f9;
-    }
+  .card h3 {
+    margin-top: 0;
+    color: var(--blu);
+  }
 
-    .chat-header {
-      background: linear-gradient(to right, var(--verde), var(--blu));
-      color: var(--bianco);
-      padding: 1rem;
-      font-weight: 600;
-      text-align: center;
-    }
+  /* 🔧 CHAT LAYOUT FIX */
+  .chat {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    border-left: 1px solid #ddd;
+    background: #f9f9f9;
+  }
 
-    .chat-messages {
-      flex: 1;
-      padding: 1rem;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 0.6rem;
-      scroll-behavior: smooth;
-    }
+  .chat-header {
+    background: linear-gradient(to right, var(--verde), var(--blu));
+    color: var(--bianco);
+    padding: 1rem;
+    font-weight: 600;
+    text-align: center;
+    flex-shrink: 0;
+  }
 
-    .message {
-      max-width: 80%;
-      padding: 0.7rem 1rem;
-      border-radius: var(--raggio);
-      box-shadow: 0 2px 6px var(--ombra);
-      animation: slideUp 0.3s ease;
-      line-height: 1.4;
-      word-wrap: break-word;
-    }
+  .chat-messages {
+    flex: 1;
+    padding: 1rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    scroll-behavior: smooth;
+    background: #fafafa;
+  }
 
-    .message.AI {
-      align-self: flex-start;
-      background: var(--blu);
-      color: var(--bianco);
-      border-bottom-left-radius: 0;
-    }
+  .message {
+    max-width: 80%;
+    padding: 0.7rem 1rem;
+    border-radius: var(--raggio);
+    box-shadow: 0 2px 6px var(--ombra);
+    animation: slideUp 0.3s ease;
+    line-height: 1.4;
+    word-wrap: break-word;
+  }
 
-    .message.Utente {
-      align-self: flex-end;
-      background: var(--verde);
-      color: var(--bianco);
-      border-bottom-right-radius: 0;
-    }
+  .message.AI {
+    align-self: flex-start;
+    background: var(--blu);
+    color: var(--bianco);
+    border-bottom-left-radius: 0;
+  }
 
-    .chat-footer {
-      padding: 1rem;
-      border-top: 1px solid #ddd;
-      display: flex;
-      flex-direction: column;
-      gap: 0.6rem;
-      background: var(--bianco);
-    }
+  .message.Utente {
+    align-self: flex-end;
+    background: var(--verde);
+    color: var(--bianco);
+    border-bottom-right-radius: 0;
+  }
 
-    .suggestions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-    }
+  .chat-footer {
+    flex-shrink: 0;
+    padding: 1rem;
+    border-top: 1px solid #ddd;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    background: var(--bianco);
+  }
 
-    .suggestions button {
-      background: #e8f2f1;
-      border: none;
-      border-radius: var(--raggio);
-      padding: 0.4rem 0.8rem;
-      cursor: pointer;
-      font-size: 0.85rem;
-      transition: all 0.3s ease;
-      color: var(--blu);
-    }
+  .suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
 
-    .suggestions button:hover {
-      background: var(--blu);
-      color: var(--bianco);
-    }
+  .suggestions button {
+    background: #e8f2f1;
+    border: none;
+    border-radius: var(--raggio);
+    padding: 0.4rem 0.8rem;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
+    color: var(--blu);
+  }
 
-    input {
-      flex: 1;
-      padding: 0.7rem 1rem;
-      border: 1px solid #ccc;
-      border-radius: var(--raggio);
-      outline: none;
-    }
+  .suggestions button:hover {
+    background: var(--blu);
+    color: var(--bianco);
+  }
 
-    .input-row {
-      display: flex;
-      gap: 0.6rem;
-      align-items: center;
-    }
+  input {
+    flex: 1;
+    padding: 0.7rem 1rem;
+    border: 1px solid #ccc;
+    border-radius: var(--raggio);
+    outline: none;
+  }
 
-    button.send {
-      background: linear-gradient(135deg, var(--verde), var(--blu));
-      color: var(--bianco);
-      border: none;
-      border-radius: var(--raggio);
-      padding: 0.8rem 1.2rem;
-      cursor: pointer;
-      font-weight: 600;
-      transition: background 0.3s, transform 0.2s;
-    }
+  .input-row {
+    display: flex;
+    gap: 0.6rem;
+    align-items: center;
+  }
 
-    button.send:hover {
-      background: linear-gradient(135deg, var(--blu), var(--verde));
-      transform: scale(1.03);
-    }
+  button.send {
+    background: linear-gradient(135deg, var(--verde), var(--blu));
+    color: var(--bianco);
+    border: none;
+    border-radius: var(--raggio);
+    padding: 0.8rem 1.2rem;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.3s, transform 0.2s;
+  }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+  button.send:hover {
+    background: linear-gradient(135deg, var(--blu), var(--verde));
+    transform: scale(1.03);
+  }
 
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 
-    main::-webkit-scrollbar,
-    .chat-messages::-webkit-scrollbar {
-      width: 8px;
-    }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 
-    main::-webkit-scrollbar-thumb,
-    .chat-messages::-webkit-scrollbar-thumb {
-      background: var(--blu);
-      border-radius: 4px;
-    }
+  main::-webkit-scrollbar,
+  .chat-messages::-webkit-scrollbar {
+    width: 8px;
+  }
 
-    .switch-page {
-      text-align: center;
-      margin-top: 1rem;
-    }
+  main::-webkit-scrollbar-thumb,
+  .chat-messages::-webkit-scrollbar-thumb {
+    background: var(--blu);
+    border-radius: 4px;
+  }
 
-    .switch-page button {
-      background: #fff;
-      color: var(--blu);
-      border: 1px solid #fff;
-      border-radius: var(--raggio);
-      padding: 0.5rem 1rem;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
+  .switch-page {
+    text-align: center;
+    margin-top: 1rem;
+  }
 
-    .switch-page button:hover {
-      background: var(--blu);
-      color: var(--bianco);
-    }
-  </style>
+  .switch-page button {
+    background: #fff;
+    color: var(--blu);
+    border: 1px solid #fff;
+    border-radius: var(--raggio);
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .switch-page button:hover {
+    background: var(--blu);
+    color: var(--bianco);
+  }
+</style>
+
 </head>
 <body>
 
