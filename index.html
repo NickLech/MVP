@@ -1,345 +1,808 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Routine Manager</title>
-  <style>
-    :root {
-      --verde: #064420;
-      --blu: #0a4d68;
-      --chiaro: #f0f8f8;
-      --bianco: #fff;
-      --ombra: rgba(0, 0, 0, 0.15);
-      --raggio: 14px;
-    }
-    html, body {
-      height: 100%; margin: 0;
-      font-family: "Segoe UI", Arial, sans-serif;
-      background: linear-gradient(135deg, var(--verde) 20%, var(--blu) 80%);
-      display: flex; align-items: center; justify-content: center;
-      color: #222; overflow: hidden;
-    }
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Routine Manager</title>
+<style>
+:root {
+  --verde: #064420;
+  --blu: #0a4d68;
+  --chiaro: #f0f8f8;
+  --bianco: #fff;
+  --ombra: rgba(0, 0, 0, 0.15);
+  --raggio: 16px;
+}
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: linear-gradient(135deg, var(--verde) 20%, var(--blu) 80%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #222;
+  overflow: hidden;
+}
+.app-wrapper {
+  width: 98%;
+  max-width: 1500px;
+  height: 93vh;
+  background: var(--bianco);
+  border-radius: var(--raggio);
+  display: grid;
+  grid-template-columns: 220px 2.1fr 390px;
+  box-shadow: 0 10px 30px var(--ombra);
+  overflow: hidden;
+}
+.sidebar {
+  background: linear-gradient(to bottom, var(--verde), var(--blu));
+  color: var(--bianco);
+  padding: 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.sidebar h2 {
+  font-size: 1.3rem;
+  margin: 0 0 1.5rem;
+  text-align: center;
+}
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.nav button {
+  background: transparent;
+  color: var(--bianco);
+  border: none;
+  padding: 0.8rem;
+  text-align: left;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.nav button.active, .nav button:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateX(4px);
+}
+main {
+  background: var(--chiaro);
+  padding: 2.1rem 0 2rem 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.content-scroll {
+  flex: 1;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
+.screen {
+  display: none;
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 32px 36px;
+}
+.screen.active {
+  display: block;
+  padding: 32px 36px;
+}
 
-    .app-wrapper {
-      width: 95%; max-width: 1250px; height: 90vh;
-      background: var(--bianco); border-radius: var(--raggio);
-      display: grid; grid-template-columns: 220px 1fr 400px;
-      box-shadow: 0 10px 30px var(--ombra);
-      overflow: hidden;
-    }
 
-    .sidebar {
-      background: linear-gradient(to bottom, var(--verde), var(--blu));
-      color: var(--bianco); padding: 1.5rem 1rem;
-      display: flex; flex-direction: column; justify-content: space-between;
-    }
-    .sidebar h2 { font-size: 1.3rem; margin: 0 0 1.5rem; text-align: center; }
-    .nav { display: flex; flex-direction: column; gap: 1rem; }
-    .nav button {
-      background: transparent; color: var(--bianco); border: none;
-      padding: 0.8rem; text-align: left; border-radius: 10px; cursor: pointer;
-      transition: 0.2s;
-    }
-    .nav button.active, .nav button:hover {
-      background: rgba(255, 255, 255, 0.15);
-      transform: translateX(4px);
-    }
+.card {
+  background: var(--bianco);
+  border-radius: var(--raggio);
+  padding: 1.2rem 2.2rem;
+  box-shadow: 0 2px 8px var(--ombra);
+  margin-bottom: 1.4rem;
+}
+.card h3 {
+  color: var(--blu);
+  margin-top: 0;
+  letter-spacing: 0.03em;
+}
+.routine-card {
+  box-shadow: 0 6px 24px rgba(10,77,104,0.13);
+  background: var(--bianco);
+  border-radius: var(--raggio);
+  padding: 1.3rem 2rem;
+  max-width: 450px;
+  margin: 0 auto;
+}
+.routine-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.routine-list li {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #e0e6ed;
+  transition: background 0.18s;
+  gap: 1.3rem;
+}
+.routine-list li:last-child { border-bottom: none; }
+.routine-list li:hover { background: #f0f8f8; border-radius: 7px; }
+.routine-time {
+  font-weight: 600;
+  color: var(--verde);
+  font-family: monospace;
+  flex-shrink: 0;
+  font-size: 1.08em;
+  opacity: 0.89;
+}
+.routine-icon {
+  font-size: 1.31em;
+  margin: 0 8px;
+  flex-shrink: 0;
+  filter: saturate(1.3);
+}
+.routine-task {
+  font-size: 1em;
+  color: var(--blu);
+  min-width: 0;
+  flex-grow: 1;
+  word-break: break-word;
+}
+/* Chat */
+.chat {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border-left: 1px solid #ddd;
+  background: #f9f9f9;
+  min-height: 0;
+}
+.chat-header {
+  background: linear-gradient(to right, var(--verde), var(--blu));
+  color: var(--bianco);
+  padding: 1rem;
+  font-weight: 600;
+  text-align: center;
+  flex-shrink: 0;
+  font-size: 1.12rem;
+}
+.chat-messages {
+  flex: 1;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  overflow-y: auto;
+  background: #fafafa;
+  scroll-behavior: smooth;
+}
+.message {
+  max-width: 82%;
+  padding: 0.7rem 1rem;
+  border-radius: var(--raggio);
+  box-shadow: 0 2px 6px var(--ombra);
+  line-height: 1.44;
+  word-wrap: break-word;
+}
+.message.AI {
+  align-self: flex-start;
+  background: var(--blu);
+  color: var(--bianco);
+  border-bottom-left-radius: 0;
+}
+.message.Utente {
+  align-self: flex-end;
+  background: var(--verde);
+  color: var(--bianco);
+  border-bottom-right-radius: 0;
+}
+.message.AI.typing {
+  font-style: italic;
+  position: relative;
+}
+.message.AI.typing::after {
+  content: "...";
+  animation: blink 1.4s infinite;
+  margin-left: 4px;
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.chat-footer {
+  padding: 1rem;
+  border-top: 1px solid #ddd;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  background: var(--bianco);
+}
+.suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.suggestions button {
+  background: #e8f2f1;
+  border: none;
+  border-radius: 12px;
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+  color: var(--blu);
+  font-size: .98em;
+  font-weight: 500;
+}
+.suggestions button:hover {
+  background: var(--blu);
+  color: var(--bianco);
+}
+.input-row {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+}
+input {
+  flex: 1;
+  padding: 0.7rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  outline: none;
+}
+button.send {
+  background: linear-gradient(135deg, var(--verde), var(--blu));
+  color: var(--bianco);
+  border: none;
+  border-radius: 12px;
+  padding: 0.8rem 1.1rem;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+}
+.switch-page {
+  text-align: center;
+  margin-top: 1rem;
+}
+.switch-page button {
+  background: #fff;
+  color: var(--blu);
+  border-radius: 10px;
+  padding: 0.5rem 1rem;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+}
+.chat-messages::-webkit-scrollbar {
+  width: 8px;
+}
+.chat-messages::-webkit-scrollbar-thumb {
+  background: var(--blu);
+  border-radius: 4px;
+}
 
-    main {
-      background: var(--chiaro); padding: 1.5rem;
-      display: flex; flex-direction: column;
-      overflow: hidden;
-    }
-    .content-scroll {
-      flex: 1; overflow-y: auto; scroll-behavior: smooth;
-    }
-    .screen { display: none; height: 100%; }
-    .screen.active { display: block; }
+#calendar .card.calendar-card {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1.5rem 2.5rem;
+  background: var(--bianco);
+  border-radius: var(--raggio);
+  box-shadow: 0 8px 32px rgba(10,77,104,0.14);
+  transition: box-shadow 0.3s ease;
+}
+#calendar .card.calendar-card:hover {
+  box-shadow: 0 12px 48px rgba(10,77,104,0.25);
+}
+#calendar .calendar-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 8px 12px;
+  background: transparent;
+  table-layout: auto;
+}
+#calendar .calendar-table thead tr th {
+  background: var(--verde);
+  border-radius: 8px;
+  color: var(--bianco);
+  padding: 14px 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.07);
+}
+#calendar .calendar-table tbody tr td {
+  background: var(--chiaro);
+  border: none;
+  padding: 16px 10px;
+  font-size: 0.95rem;
+  text-align: center;
+  vertical-align: top;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px var(--ombra);
+  cursor: default;
+  transition: background 0.3s ease;
+  word-wrap: break-word;
+  min-height: 70px;
+}
+#calendar .calendar-table tbody tr td:hover {
+  background: #e6f3f1;
+}
+#calendar .calendar-event {
+  background: var(--blu);
+  color: var(--bianco);
+  padding: 6px 14px;
+  border-radius: 12px;
+  margin: 4px 0;
+  font-size: 0.9rem;
+  box-shadow: 0 6px 18px rgba(0, 75, 110, 0.1);
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.25s ease;
+}
+#calendar .calendar-event:hover {
+  background-color: #005f8a;
+}
+#calendar .calendar-table tbody tr:nth-child(even) td {
+  background: #f9fdfc;
+}
 
-    .card {
-      background: var(--bianco); border-radius: var(--raggio);
-      padding: 1rem 1.2rem; box-shadow: 0 2px 8px var(--ombra);
-      margin-bottom: 1rem;
-    }
-    .card h3 { color: var(--blu); margin-top: 0; }
 
-    /* Chat */
-    .chat {
-      display: flex; flex-direction: column; height: 100%;
-      border-left: 1px solid #ddd; background: #f9f9f9;
-      min-height: 0;
-    }
-    .chat-header {
-      background: linear-gradient(to right, var(--verde), var(--blu));
-      color: var(--bianco); padding: 1rem; font-weight: 600;
-      text-align: center; flex-shrink: 0;
-    }
-    .chat-messages {
-      flex: 1; padding: 1rem; display: flex; flex-direction: column;
-      gap: 0.6rem; overflow-y: auto; background: #fafafa;
-      scroll-behavior: smooth;
-    }
-    .message {
-      max-width: 80%; padding: 0.7rem 1rem; border-radius: var(--raggio);
-      box-shadow: 0 2px 6px var(--ombra); line-height: 1.4;
-      word-wrap: break-word;
-    }
-    .message.AI { align-self: flex-start; background: var(--blu); color: var(--bianco); border-bottom-left-radius: 0; }
-    .message.Utente { align-self: flex-end; background: var(--verde); color: var(--bianco); border-bottom-right-radius: 0; }
-
-    .chat-footer {
-      padding: 1rem; border-top: 1px solid #ddd;
-      display: flex; flex-direction: column; gap: 0.6rem;
-      background: var(--bianco);
-    }
-    .suggestions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-    .suggestions button {
-      background: #e8f2f1; border: none; border-radius: 12px;
-      padding: 0.4rem 0.8rem; cursor: pointer; color: var(--blu);
-    }
-    .suggestions button:hover { background: var(--blu); color: var(--bianco); }
-    .input-row { display: flex; gap: 0.6rem; align-items: center; }
-    input { flex: 1; padding: 0.7rem 1rem; border: 1px solid #ccc; border-radius: 12px; outline: none; }
-    button.send {
-      background: linear-gradient(135deg, var(--verde), var(--blu));
-      color: var(--bianco); border: none; border-radius: 12px;
-      padding: 0.8rem 1.1rem; cursor: pointer;
-    }
-
-    .switch-page { text-align: center; margin-top: 1rem; }
-    .switch-page button {
-      background: #fff; color: var(--blu); border-radius: 10px;
-      padding: 0.5rem 1rem; border: none; cursor: pointer;
-    }
-
-    .chat-messages::-webkit-scrollbar { width: 8px; }
-    .chat-messages::-webkit-scrollbar-thumb { background: var(--blu); border-radius: 4px; }
-
-  </style>
+.card ul {
+  list-style: none;
+  padding-left: 0;
+}
+.integration-item {
+  background: #e8f2f1;
+  border-radius: 12px;
+  padding: 0.8rem 1rem;
+  margin: 0.5rem 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--blu);
+  cursor: pointer;
+  transition: background 0.22s;
+  font-size: 1rem;
+}
+.integration-item:hover {
+  background: var(--blu);
+  color: var(--bianco);
+}
+.integration-status {
+  font-size: 1.23rem;
+}
+button.add-service {
+  margin-top: 1rem;
+  background: linear-gradient(135deg, var(--verde), var(--blu));
+  color: var(--bianco);
+  border: none;
+  border-radius: 12px;
+  padding: 0.7rem 1.1rem;
+  cursor: pointer;
+  font-weight: 500;
+}
+button.add-service:hover {
+  background: var(--verde);
+}
+</style>
 </head>
 <body>
-  <!-- Pagina Base -->
-  <div class="app-wrapper" id="userPage">
-    <aside class="sidebar">
-      <div>
-        <h2>Routine Manager</h2>
-        <nav class="nav" id="userNav">
-          <button class="active" data-screen="dashboard">🏠 Dashboard</button>
-          <button data-screen="calendar">📅 Calendario</button>
-          <button data-screen="routine">🧠 Routine</button>
-          <button data-screen="groups">👥 Gruppi</button>
-          <button data-screen="integrations">🔗 Integrazioni</button>
-        </nav>
-      </div>
-      <div class="switch-page">
-        <button id="toDev">👨‍💻 Modalità Dev</button>
-      </div>
-    </aside>
-
-    <main>
-      <div class="content-scroll">
-        <section id="dashboard" class="screen active">
-          <div class="card"><h3>📊 Panoramica giornaliera</h3><p>3 attività completate su 5. Oggi: riunione, allenamento, spesa.</p></div>
-          <div class="card"><h3>🔔 Promemoria</h3><p>Pagamento bolletta domani.</p></div>
-        </section>
-        <section id="calendar" class="screen">
-          <div class="card"><h3>📅 Calendario settimanale</h3><ul><li>Lunedì: Lavoro remoto</li><li>Martedì: Riunione 10:00</li><li>Sabato: libero (tutti disponibili per pranzo!)</li></ul></div>
-        </section>
-        <section id="routine" class="screen">
-          <div class="card"><h3>🧠 Routine giornaliera</h3><ul><li>07:00 - Meditazione</li><li>08:00 - Focus</li><li>17:30 - Allenamento</li></ul></div>
-        </section>
-        <section id="groups" class="screen">
-          <div class="card"><h3>👪 Gruppo Famiglia</h3><p>Tutti sono liberi sabato — suggerisco di organizzare un pranzo insieme 🍝</p></div>
-          <div class="card"><h3>➕ Crea nuovo gruppo</h3><p>Puoi aggiungere membri, impostare eventi e sincronizzare calendari condivisi.</p></div>
-        </section>
-        <section id="integrations" class="screen">
-          <div class="card"><h3>🔗 Integrazioni attive</h3><ul><li>Google Calendar ✅</li><li>WhatsApp Connect ⚙️</li><li>Drive Share ✅</li></ul></div>
-        </section>
-      </div>
-    </main>
-
-    <section class="chat">
-      <div class="chat-header">Assistente Personale</div>
-      <div class="chat-messages" id="messages"></div>
-      <div class="chat-footer">
-        <div class="suggestions" id="suggestions">
-          <button data-msg="mostrami il calendario">📅 calendario</button>
-          <button data-msg="come migliorare la routine">🧘 routine</button>
-          <button data-msg="eventi in famiglia">👪 famiglia</button>
+<!-- Pagina Base -->
+<div class="app-wrapper" id="userPage">
+  <aside class="sidebar">
+    <div>
+      <h2>Routine Manager</h2>
+      <nav class="nav" id="userNav">
+        <button class="active" data-screen="dashboard">🏠 Dashboard</button>
+        <button data-screen="calendar">📅 Calendario</button>
+        <button data-screen="routine">🧠 Routine</button>
+        <button data-screen="groups">👥 Gruppi</button>
+        <button data-screen="integrations">🔗 Integrazioni</button>
+      </nav>
+    </div>
+    <div class="switch-page">
+      <button id="toDev">Modalità Developer</button>
+    </div>
+  </aside>
+  <main>
+    <div class="content-scroll">
+      <section id="dashboard" class="screen active">
+        <div class="card">
+          <h3>📊 Panoramica giornaliera</h3>
+          <p>3 attività completate su 5. Oggi: riunione, allenamento, spesa.</p>
         </div>
-        <div class="input-row">
-          <input id="userInput" type="text" placeholder="Scrivi o tocca un suggerimento..." />
-          <button class="send" id="sendBtn">Invia</button>
+        <div class="card">
+          <h3>🔔 Promemoria</h3>
+          <p>Pagamento bolletta domani.</p>
         </div>
-      </div>
-    </section>
-  </div>
-
-  <!-- Pagina Dev -->
-  <div class="app-wrapper" id="devPage" style="display:none;">
-    <aside class="sidebar">
-      <div>
-        <h2>Developer Hub</h2>
-        <nav class="nav" id="devNav">
-          <button class="active" data-screen="overview">🏗 Overview</button>
-          <button data-screen="github">🐙 GitHub</button>
-          <button data-screen="api">🔌 API</button>
-          <button data-screen="groupsDev">👥 Team</button>
-        </nav>
-      </div>
-      <div class="switch-page">
-        <button id="toUser">🏠 Modalità Base</button>
-      </div>
-    </aside>
-
-    <main>
-      <div class="content-scroll">
-        <section id="overview" class="screen active">
-          <div class="card"><h3>📦 Build Status</h3><p>Ultima build completata alle 09:12 ✅</p></div>
-          <div class="card"><h3>⚙️ Ambiente</h3><p>Node v20, Next.js 15, Database connesso.</p></div>
-        </section>
-        <section id="github" class="screen">
-          <div class="card"><h3>🐙 Repo principale</h3><p>Branch: <b>main</b> · Pull Request aperte: 2 · Issue: 3</p></div>
-        </section>
-        <section id="api" class="screen">
-          <div class="card"><h3>🔌 Monitor API</h3><p>Latency media: 120ms · Status: OK · Endpoint attivi: /login, /sync, /groups</p></div>
-        </section>
-        <section id="groupsDev" class="screen">
-          <div class="card"><h3>👨‍💻 Team Progetto Pagina Web</h3><ul><li>Anna – UI/UX</li><li>Marco – Backend</li><li>Sara – Frontend</li></ul><p>Task: <b>Homepage responsive</b> in progress, <b>API Auth</b> completata ✅</p></div>
-          <div class="card"><h3>➕ Crea nuovo team</h3><p>Assegna ruoli, task e integrazioni GitHub automatiche.</p></div>
-        </section>
-      </div>
-    </main>
-
-    <section class="chat">
-      <div class="chat-header">Assistente Dev</div>
-      <div class="chat-messages" id="messagesDev"></div>
-      <div class="chat-footer">
-        <div class="suggestions" id="suggestionsDev">
-          <button data-msg="stato build">🏗 build</button>
-          <button data-msg="api attive">🔌 api</button>
-          <button data-msg="team progetto">👥 team</button>
+      </section>
+      <section id="calendar" class="screen">
+        <div class="card calendar-card">
+          <h3>📅 Calendario settimanale</h3>
+          <table class="calendar-table" aria-label="Calendario settimanale">
+            <thead>
+              <tr>
+                <th>Lunedì</th>
+                <th>Martedì</th>
+                <th>Mercoledì</th>
+                <th>Giovedì</th>
+                <th>Venerdì</th>
+                <th>Sabato</th>
+                <th>Domenica</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><div class="calendar-event" title="Lavoro remoto">Lavoro remoto</div></td>
+                <td><div class="calendar-event" title="Riunione 10:00">Riunione 10:00</div></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td><div class="calendar-event" title="Libero, pranzo tutti">Libero (pranzo tutti!)</div></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td colspan="7" style="font-style: italic; font-size: 0.89rem; text-align:center; color:#555;">Eventi per la settimana visualizzati giorno per giorno</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-        <div class="input-row">
-          <input id="devInput" type="text" placeholder="Scrivi o tocca un suggerimento..." />
-          <button class="send" id="devSendBtn">Invia</button>
+      </section>
+      <section id="routine" class="screen">
+        <div class="card routine-card">
+          <h3>🧠 Routine giornaliera</h3>
+          <ul class="routine-list">
+            <li>
+              <span class="routine-time">07:00</span>
+              <span class="routine-icon">🧘</span>
+              <span class="routine-task">Meditazione</span>
+            </li>
+            <li>
+              <span class="routine-time">08:00</span>
+              <span class="routine-icon">⚡</span>
+              <span class="routine-task">Focus Extra Profondo</span>
+            </li>
+            <li>
+              <span class="routine-time">17:30</span>
+              <span class="routine-icon">🏃‍♂️</span>
+              <span class="routine-task">Allenamento funzionale di gruppo in palestra</span>
+            </li>
+          </ul>
         </div>
+      </section>
+      <section id="groups" class="screen">
+        <div class="card">
+          <h3>Gruppo Famiglia</h3>
+          <p>Tutti sono liberi sabato — suggerisco di organizzare un pranzo insieme 🍝</p>
+        </div>
+        <div class="card">
+          <h3>➕ Crea nuovo gruppo</h3>
+          <p>Puoi aggiungere membri, impostare eventi e sincronizzare calendari condivisi.</p>
+        </div>
+      </section>
+      <section id="integrations" class="screen">
+        <div class="card">
+          <h3>Integrazioni attive</h3>
+          <ul id="integrationList" aria-live="polite"></ul>
+          <button class="add-service" id="addIntegrationBtn" aria-label="Aggiungi nuovo servizio">➕ Aggiungi servizio</button>
+        </div>
+      </section>
+    </div>
+  </main>
+  <section class="chat" aria-live="polite" aria-atomic="false">
+    <div class="chat-header">Assistente Personale</div>
+    <div class="chat-messages" id="messages"></div>
+    <div class="chat-footer">
+      <div class="suggestions" id="suggestions" role="list">
+        <button data-msg="mostrami il calendario" role="listitem" aria-label="Mostrami il calendario">calendario</button>
+        <button data-msg="come migliorare la routine" role="listitem" aria-label="Come migliorare la routine">routine</button>
+        <button data-msg="eventi in famiglia" role="listitem" aria-label="Eventi in famiglia">famiglia</button>
       </div>
-    </section>
-  </div>
+      <div class="input-row">
+        <input id="userInput" type="text" placeholder="Scrivi o tocca un suggerimento..." aria-label="Input messaggio" />
+        <button class="send" id="sendBtn" aria-label="Invia messaggio" disabled>Invia</button>
+      </div>
+    </div>
+  </section>
+</div>
+<div class="app-wrapper" id="devPage" style="display:none;">
+  <aside class="sidebar">
+    <div>
+      <h2>Developer Hub</h2>
+      <nav class="nav" id="devNav">
+        <button class="active" data-screen="overview">🏗 Overview</button>
+        <button data-screen="github">🐙 GitHub</button>
+        <button data-screen="api">🔌 API</button>
+        <button data-screen="groupsDev">👥 Team</button>
+        <button data-screen="integrationsDev">🔗 Integrazioni</button>
+      </nav>
+    </div>
+    <div class="switch-page">
+      <button id="toUser">Modalità Base</button>
+    </div>
+  </aside>
+  <main>
+    <div class="content-scroll">
+      <section id="overview" class="screen active">
+        <div class="card">
+          <h3>📦 Build Status</h3>
+          <p>Ultima build completata alle 09:12 ✅</p>
+        </div>
+        <div class="card">
+          <h3>⚙️ Ambiente</h3>
+          <p>Node v20, Next.js 15, Database connesso.</p>
+        </div>
+      </section>
+      <section id="github" class="screen">
+        <div class="card">
+          <h3>🐙 Repo principale</h3>
+          <p>Branch: <b>main</b> · Pull Request aperte: 2 · Issue: 3</p>
+        </div>
+      </section>
+      <section id="api" class="screen">
+        <div class="card">
+          <h3>🔌 Monitor API</h3>
+          <p>Latency media: 120ms · Status: OK · Endpoint attivi: /login, /sync, /groups</p>
+        </div>
+      </section>
+      <section id="groupsDev" class="screen">
+        <div class="card">
+          <h3>👨‍💻 Team Progetto Pagina Web</h3>
+          <ul>
+            <li>Anna – UI/UX</li>
+            <li>Marco – Backend</li>
+            <li>Sara – Frontend</li>
+          </ul>
+          <p>Task: <b>Homepage responsive</b> in progress, <b>API Auth</b> completata ✅</p>
+        </div>
+        <div class="card">
+          <h3>➕ Crea nuovo team</h3>
+          <p>Assegna ruoli, task e integrazioni GitHub automatiche.</p>
+        </div>
+      </section>
+      <section id="integrationsDev" class="screen">
+        <div class="card">
+            <h3>Integrazioni</h3>
+            <ul id="integrationListDev" aria-live="polite"></ul>
+            <button class="add-service" id="addIntegrationBtnDev" aria-label="Aggiungi nuovo servizio">➕ Aggiungi servizio</button>
+        </div>
+        </section>
 
-  <script>
-    // NAV BASE
-    function setupNav(navId, mainId) {
-      document.querySelectorAll(`#${navId} button`).forEach(btn => {
-        btn.addEventListener("click", () => {
-          document.querySelectorAll(`#${navId} button`).forEach(b => b.classList.remove("active"));
-          btn.classList.add("active");
-          document.querySelectorAll(`#${mainId} .screen`).forEach(s => s.classList.remove("active"));
-          document.getElementById(btn.dataset.screen).classList.add("active");
-        });
-      });
-    }
-    setupNav("userNav", "userPage");
-    setupNav("devNav", "devPage");
+    </div>
+  </main>
+  <section class="chat">
+    <div class="chat-header">Developer Assistance</div>
+    <div class="chat-messages" id="messagesDev"></div>
+    <div class="chat-footer">
+      <div class="suggestions" id="suggestionsDev">
+        <button data-msg="stato build">🏗 build</button>
+        <button data-msg="api attive">🔌 api</button>
+        <button data-msg="team progetto">👥 team</button>
+      </div>
+      <div class="input-row">
+        <input id="devInput" type="text" placeholder="Scrivi o tocca un suggerimento..." />
+        <button class="send" id="devSendBtn">Invia</button>
+      </div>
+    </div>
+  </section>
+</div>
+<script>
+const integrationListDev = document.getElementById('integrationListDev');
+const addIntegrationBtnDev = document.getElementById('addIntegrationBtnDev');
 
-    // SWITCH PAGINE
-    document.getElementById("toDev").addEventListener("click", () => {
-      document.getElementById("userPage").style.display = "none";
-      document.getElementById("devPage").style.display = "grid";
+let integrationsDev = [
+  {name: "GitHub", active: true},
+  {name: "Docker", active: false}
+];
+
+function renderIntegrationsDev() {
+  integrationListDev.innerHTML = '';
+  integrationsDev.forEach((service, i) => {
+    const li = document.createElement('li');
+    li.className = 'integration-item';     // classe condivisa
+    li.setAttribute('tabindex', 0);
+    li.setAttribute('role', 'button');
+    li.setAttribute('aria-pressed', service.active ? 'true' : 'false');
+    li.textContent = service.name;
+    const status = document.createElement('span');
+    status.className = 'integration-status';  // classe condivisa
+    status.textContent = service.active ? '✅' : '⚙️';
+    li.appendChild(status);
+
+    li.addEventListener('click', () => {
+      integrationsDev[i].active = !integrationsDev[i].active;
+      renderIntegrationsDev();
     });
-    document.getElementById("toUser").addEventListener("click", () => {
-      document.getElementById("devPage").style.display = "none";
-      document.getElementById("userPage").style.display = "grid";
+    li.addEventListener('keyup', e => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        li.click();
+      }
     });
+    integrationListDev.appendChild(li);
+  });
+}
+renderIntegrationsDev();
 
-    // CHAT
-    function setupChat(msgContainerId, inputId, sendId, suggestionsId) {
-      const container = document.getElementById(msgContainerId);
-      const input = document.getElementById(inputId);
-      const sendBtn = document.getElementById(sendId);
-      const suggestions = document.getElementById(suggestionsId);
+addIntegrationBtnDev.addEventListener('click', () => {
+  const newName = prompt("Inserisci nome del nuovo servizio:");
+  if(newName && newName.trim() !== "") {
+    integrationsDev.push({name: newName.trim(), active: true});
+    renderIntegrationsDev();
+  }
+});
+    
+function setupNav(navId, mainId) {
+  document.querySelectorAll(`#${navId} button`).forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(`#${navId} button`).forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      document.querySelectorAll(`#${mainId} .screen`).forEach(s => s.classList.remove("active"));
+      document.getElementById(btn.dataset.screen).classList.add("active");
+    });
+  });
+}
+setupNav("userNav", "userPage");
+setupNav("devNav", "devPage");
+document.getElementById("toDev").addEventListener("click", () => {
+  document.getElementById("userPage").style.display = "none";
+  document.getElementById("devPage").style.display = "grid";
+});
+document.getElementById("toUser").addEventListener("click", () => {
+  document.getElementById("devPage").style.display = "none";
+  document.getElementById("userPage").style.display = "grid";
+});
+function setupChat(msgContainerId, inputId, sendId, suggestionsId) {
+  const container = document.getElementById(msgContainerId);
+  const input = document.getElementById(inputId);
+  const sendBtn = document.getElementById(sendId);
+  const suggestions = document.getElementById(suggestionsId);
+  function canSend() { return input.value.trim().length > 0; }
+  input.addEventListener('input', () => { sendBtn.disabled = !canSend(); });
+  function appendMessage(msg, author, typing=false) {
+    const div = document.createElement("div");
+    div.className = "message " + author;
+    if (typing) div.classList.add("typing");
+    div.textContent = msg;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+    return div;
+  }
+  
+  
+function aiSuggestion(userMsg) {
+  if (!userMsg || typeof userMsg !== 'string') {
+    return "Al momento non sono capace di aiutarti, ma sto imparando!";
+  }
+  const normalized = userMsg
+    .normalize && userMsg.normalize('NFD').replace(/\p{Diacritic}/gu, '')
+    || userMsg;
+  const text = String(normalized).toLowerCase().trim();
 
-      function sendMessage(msg, author) {
-        const div = document.createElement("div");
-        div.className = "message " + author;
-        div.innerText = msg;
-        container.appendChild(div);
-        container.scrollTop = container.scrollHeight;
-      }
+  const responsesFamiglia = [
+    "La famiglia ha un pranzo previsto per sabato, vuoi aggiungerlo al calendario?",
+    "Hai deciso se partecipare al pranzo di sabato?"
+  ];
 
-      function aiSuggestion(userMsg) {
-        // Debug: log input so we can inspect what arrives here in DevTools
-        console.log('[aiSuggestion] raw input:', userMsg);
+  const responsesRoutine = [
+    "Ti suggerisco di fare la spesa verso le 18:00, dopo l’allenamento.",
+    "Hai già impostato la meditazione ogni mattina alle 7:00.",
+    "Per migliorare la routine potresti aggiungere una pausa relax a metà pomeriggio.",
+    "La tua routine è molto equilibrata, continua così!"
+  ];
 
-        // Guard: ensure we have a string
-        if (!userMsg || typeof userMsg !== 'string') {
-          return "Posso aiutarti a gestire i tuoi impegni! Dimmi cosa vuoi pianificare.";
-        }
+  const responsesCalendario = [
+    "Martedì alle 10:00 hai una riunione programmata, ti preparo tutto per tempo.",
+    "Ho già aggiunto per te un evento importante questa settimana, te lo ricorderò il giorno prima.",
+    "Il tuo calendario è sincronizzato e aggiornato.",
+    "Ti terrò aggiornato automaticamente con promemoria per i tuoi eventi importanti."
+  ];
 
-        // Normalize to remove accents, trim and lowercase so matching is robust
-        // e.g. "famiglia", "Famiglia", "famìglia" -> "famiglia"
-        const normalized = userMsg
-          .normalize && userMsg.normalize('NFD').replace(/\p{Diacritic}/gu, '')
-          || userMsg;
-        const text = String(normalized).toLowerCase().trim();
-        console.log('[aiSuggestion] normalized:', text);
+  const buildStatusResponses = [
+    "📦 Lo stato dell'ultima build è OK: completata con successo alle 09:12 ✅. Il sistema gira su Node v20 con Next.js 15 e un database connesso."
+  ];
 
-        // Use word-boundary regex checks to avoid substring false-positives
-        if (/\bfamiglia\b/.test(text)) {
-          return "Ti suggerisco di fare la spesa verso le 18:00, dopo l’allenamento.";
-        }
-        if (/\broutine\b/.test(text)) {
-          return "Ottimo, l’allenamento alle 17:30 è già programmato nella tua routine!";
-        }
-        if (/\bcalendario\b/.test(text)) {
-          return "Hai già una riunione martedì alle 10:00. Vuoi prepararti il giorno prima?";
-        }
+  const apiActiveResponses = [
+    "🔌 Le API attive includono gli endpoint /login, /sync e /groups con una latenza media di 120ms e stato operativo."
+  ];
 
-        return "Posso aiutarti a gestire i tuoi impegni! Dimmi cosa vuoi pianificare.";
-      }
+  const teamProjectResponses = [
+    "👨‍💻 Il team di progetto comprende Anna (UI/UX), Marco (Backend) e Sara (Frontend). Attualmente lavorano alla homepage responsive e autenticazione API completata."
+  ];
 
-      // Centralized send function to avoid timing issues when suggestions set input.value
-      function performSend(msg) {
-        console.log('[performSend] msg before trim:', JSON.stringify(msg));
-        if (!msg || String(msg).trim() === '') {
-          console.warn('[performSend] empty message - aborting send');
-          return;
-        }
-        const trimmed = String(msg).trim();
-        sendMessage(trimmed, "Utente");
-        setTimeout(() => sendMessage(aiSuggestion(trimmed), "AI"), 600);
-        // clear the input UI if it's the text input
-        try { input.value = ''; } catch (e) { /* ignore */ }
-      }
+  // Risposte a feedback utente
+  if (/\b(va bene|ok|sì|si|certo|okay|yes|d'accordo|confermo|grazie)\b/.test(text)) {
+    return "Perfetto, fammi sapere se hai bisogno di altro.";
+  }
+  if (/\b(no|non|nono|assolutamente no|negativo|no grazie)\b/.test(text)) {
+    return "Nessun problema, fammi sapere se posso aiutarti con altro.";
+  }
 
-      sendBtn.addEventListener("click", () => {
-        // Log the value so we can see exactly what's sent when clicking the send button
-        console.log('[sendBtn] input.value:', JSON.stringify(input.value));
-        performSend(input.value);
-      });
+  if (/\bfamiglia\b|\bparenti\b|\bfesta\b|\bpranzo\b/.test(text)) {
+    return responsesFamiglia[Math.floor(Math.random() * responsesFamiglia.length)];
+  }
+  if (/\broutine\b|\brespiro\b|\bmeditazione\b|\ballenamento\b|\bfocus\b/.test(text)) {
+    return responsesRoutine[Math.floor(Math.random() * responsesRoutine.length)];
+  }
+  if (/\bcalendario\b|\bevento\b|\brigunione\b|\bpromemoria\b/.test(text)) {
+    return responsesCalendario[Math.floor(Math.random() * responsesCalendario.length)];
+  }
+  if (/\bstato build\b|\bbuild\b|\bstato compilazione\b/.test(text)) {
+    return buildStatusResponses[0];
+  }
+  if (/\bapi attive\b|\bapi\b|\bendpoints\b/.test(text)) {
+    return apiActiveResponses[0];
+  }
+  if (/\bteam progetto\b|\bteam\b|\bprogetto\b/.test(text)) {
+    return teamProjectResponses[0];
+  }
 
-      input.addEventListener("keypress", e => {
-        if (e.key === "Enter") {
-          e.preventDefault();
-          performSend(input.value);
-        }
-      });
+  return "Al momento non sono capace di aiutarti su questo, ma sto continuando a imparare.";
+}
 
-      suggestions.querySelectorAll("button").forEach(b => {
-        b.addEventListener("click", () => {
-          // Read the suggestion directly from dataset and send it via performSend.
-          // This avoids relying on setting input.value and then programmatically clicking the send button,
-          // which in some edge cases can lead to timing/order issues.
-          console.log('[suggestion click] data-msg:', JSON.stringify(b.dataset.msg));
-          performSend(b.dataset.msg);
-        });
-      });
+
+
+
+  function performSend(msg) {
+  const trimmed = String(msg).trim();
+  if (trimmed === "") return;
+  appendMessage(trimmed, "Utente");
+  input.value = "";
+  sendBtn.disabled = true;
+  input.focus();
+  appendMessage(aiSuggestion(trimmed), "AI");
+}
+
+  sendBtn.addEventListener("click", () => { performSend(input.value); });
+  input.addEventListener("keypress", e => {
+    if (e.key === "Enter" && canSend()) {
+      e.preventDefault();
+      performSend(input.value);
     }
-    setupChat("messages", "userInput", "sendBtn", "suggestions");
-    setupChat("messagesDev", "devInput", "devSendBtn", "suggestionsDev");
-
-  </script>
+  });
+  suggestions.querySelectorAll("button").forEach(b => {
+    b.addEventListener("click", () => { performSend(b.dataset.msg); });
+  });
+}
+setupChat("messages", "userInput", "sendBtn", "suggestions");
+setupChat("messagesDev", "devInput", "devSendBtn", "suggestionsDev");
+const integrationList = document.getElementById('integrationList');
+const addIntegrationBtn = document.getElementById('addIntegrationBtn');
+let integrations = [
+  {name: "Google Calendar", active: true},
+  {name: "WhatsApp", active: false},
+];
+function renderIntegrations() {
+  integrationList.innerHTML = '';
+  integrations.forEach((service, i) => {
+    const li = document.createElement('li');
+    li.className = 'integration-item';
+    li.setAttribute('tabindex', 0);
+    li.setAttribute('role', 'button');
+    li.setAttribute('aria-pressed', service.active ? 'true' : 'false');
+    li.textContent = service.name;
+    const status = document.createElement('span');
+    status.className = 'integration-status';
+    status.textContent = service.active ? '✅' : '⚙️';
+    li.appendChild(status);
+    li.addEventListener('click', () => {
+      integrations[i].active = !integrations[i].active;
+      renderIntegrations();
+    });
+    li.addEventListener('keyup', e => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        li.click();
+      }
+    });
+    integrationList.appendChild(li);
+  });
+}
+renderIntegrations();
+  addIntegrationBtn.addEventListener('click', () => {
+    const newName = prompt("Inserisci nome del nuovo servizio:");
+    if(newName && newName.trim() !== "") {
+      integrations.push({name: newName.trim(), active: true});
+      renderIntegrations();
+    }
+  });
+</script>
 </body>
 </html>
