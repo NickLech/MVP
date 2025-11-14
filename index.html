@@ -116,58 +116,6 @@
     .chat-messages::-webkit-scrollbar { width: 8px; }
     .chat-messages::-webkit-scrollbar-thumb { background: var(--blu); border-radius: 4px; }
 
-    /* Feedback pulsante flottante e form */
-    #feedbackBtn {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      z-index: 9999;
-      background: linear-gradient(135deg, var(--verde), var(--blu));
-      color: #fff;
-      border: none;
-      border-radius: 50px;
-      padding: 0.75rem 1.5rem;
-      cursor: pointer;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-      font-size: 1rem;
-      transition: transform 0.2s;
-    }
-
-    #feedbackBtn:hover { transform: scale(1.05); }
-
-    #feedbackFormContainer {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      z-index: 10000;
-    }
-    #feedbackOverlay {
-      position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.4);
-    }
-    #feedbackFormWrapper {
-      position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      background: #fff;
-      border-radius: 14px;
-      padding: 2rem;
-      width: 90%;
-      max-width: 500px;
-      max-height: 90%;
-      overflow-y: auto;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    }
-    #closeFeedback {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: none;
-      border: none;
-      font-size: 1.25rem;
-      cursor: pointer;
-    }
   </style>
 </head>
 <body>
@@ -281,46 +229,6 @@
     </section>
   </div>
 
-  <!-- Pulsante Feedback flottante -->
-  <button id="feedbackBtn" title="Invia Feedback">💬 Feedback</button>
-
-  <!-- Contenitore del form di feedback -->
-  <div id="feedbackFormContainer">
-    <div id="feedbackOverlay"></div>
-    <div id="feedbackFormWrapper">
-      <button id="closeFeedback">✖</button>
-      <form action="https://formspree.io/f/{FORM_ID}" class="fs-form" target="_top" method="POST">
-        <fieldset>
-          <legend class="fs-fieldset-title">Documentation Feedback</legend>
-          <div class="fs-field">
-            <label class="fs-label" for="found_what_looking_for">Did you find what you were looking for?</label>
-            <div class="thumbs-group">
-              <div class="thumbs-wrapper">
-                <input type="radio" name="found_what_looking_for" id="thumbs-yes" value="positive">
-                <label for="thumbs-yes">👍 Yes</label>
-              </div>
-              <div class="thumbs-wrapper">
-                <input type="radio" name="found_what_looking_for" id="thumbs-no" value="negative">
-                <label for="thumbs-no">👎 No</label>
-              </div>
-            </div>
-          </div>
-          <div class="fs-field">
-            <label class="fs-label" for="detailed-feedback">Please provide your feedback:</label>
-            <textarea class="fs-textarea" id="detailed-feedback" name="detailed-feedback" required></textarea>
-          </div>
-          <div class="fs-field">
-            <label class="fs-label" for="email-address">Email Address (optional)</label>
-            <input class="fs-input" id="email-address" name="email-address" />
-          </div>
-        </fieldset>
-        <div class="fs-button-group">
-          <button class="fs-button" type="submit">Submit Feedback</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
   <script>
     // NAV BASE
     function setupNav(navId, mainId) {
@@ -432,15 +340,6 @@
     setupChat("messages", "userInput", "sendBtn", "suggestions");
     setupChat("messagesDev", "devInput", "devSendBtn", "suggestionsDev");
 
-    // FEEDBACK
-    const feedbackBtn = document.getElementById("feedbackBtn");
-    const feedbackContainer = document.getElementById("feedbackFormContainer");
-    const closeFeedback = document.getElementById("closeFeedback");
-    const feedbackOverlay = document.getElementById("feedbackOverlay");
-
-    feedbackBtn.addEventListener("click", () => feedbackContainer.style.display = "block");
-    closeFeedback.addEventListener("click", () => feedbackContainer.style.display = "none");
-    feedbackOverlay.addEventListener("click", () => feedbackContainer.style.display = "none");
   </script>
 </body>
 </html>
