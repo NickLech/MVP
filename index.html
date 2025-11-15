@@ -334,17 +334,14 @@ button.send {
   background: #e6f3f1;
 }
 #calendar .calendar-event {
-  background: var(--blu);
-  color: var(--bianco);
-  padding: 6px 14px;
-  border-radius: 12px;
-  margin: 4px 0;
-  font-size: 0.9rem;
-  box-shadow: 0 6px 18px rgba(0, 75, 110, 0.1);
-  cursor: pointer;
-  user-select: none;
-  transition: background-color 0.25s ease;
+  display: block;
+  max-width: 100%;
+
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
+
 #calendar .calendar-event:hover {
   background-color: #005f8a;
 }
