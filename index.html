@@ -817,7 +817,7 @@ function aiSuggestion(userMsg) {
   }
   if (/\bcalendario\b|\bevento\b|\brigunione\b|\bpromemoria\b/.test(text)) {
     // If user expresses intent to add an event, set awaitingEvent state and ask for details
-    if (/\b(aggiung|aggiungere|voglio aggiungere|nuovo impegno|aggiungere un|aggiungo)\b/.test(text)) {
+    if (/\b(aggiungi|aggiung|aggiungere|voglio aggiungere|nuovo impegno|aggiungere un|aggiungo)\b/.test(text)) {
       window.chatContext.awaitingEvent = true;
       return "Perfetto, dimmi il nome dell'evento e il giorno";
     }
