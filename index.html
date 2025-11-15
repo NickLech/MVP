@@ -13,6 +13,15 @@
   --ombra: rgba(0, 0, 0, 0.15);
   --raggio: 16px;
 }
+/* Visual highlight for calendar updates */
+.cell-updated {
+  animation: calendar-flash 0.9s ease;
+}
+@keyframes calendar-flash {
+  0% { background: #e6f9f4; }
+  50% { background: #d7f3ea; }
+  100% { background: var(--chiaro); }
+}
 html, body {
   height: 100%;
   margin: 0;
@@ -414,36 +423,36 @@ button.add-service:hover {
         </div>
       </section>
       <section id="calendar" class="screen">
-        <div class="card calendar-card">
-          <h3>📅 Calendario settimanale</h3>
-          <table class="calendar-table" aria-label="Calendario settimanale">
-            <thead>
-              <tr>
-                <th>Lunedì</th>
-                <th>Martedì</th>
-                <th>Mercoledì</th>
-                <th>Giovedì</th>
-                <th>Venerdì</th>
-                <th>Sabato</th>
-                <th>Domenica</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><div class="calendar-event" title="Lavoro remoto 8:00 - 17:00">Lavoro remoto 8:00 - 17:00</div></td>
-                <td><div class="calendar-event" title="Riunione 10:00">Riunione 10:00</div></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td><div class="calendar-event" title="Tutti liberi in famiglia, suggerisco un pranzo assieme!">Tutti liberi in famiglia, suggerisco un pranzo assieme!</div></td>
-                <td></td>
-              </tr>
-              <tr>
-                <td colspan="7" style="font-style: italic; font-size: 0.89rem; text-align:center; color:#555;">Eventi per la settimana visualizzati giorno per giorno</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+          <div class="card calendar-card">
+            <h3>📅 Calendario settimanale</h3>
+            <table class="calendar-table" aria-label="Calendario settimanale">
+              <thead>
+                <tr>
+                  <th>Lunedì</th>
+                  <th>Martedì</th>
+                  <th>Mercoledì</th>
+                  <th>Giovedì</th>
+                  <th>Venerdì</th>
+                  <th>Sabato</th>
+                  <th>Domenica</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td data-day="lunedi"></td>
+                  <td data-day="martedi"></td>
+                  <td data-day="mercoledi"></td>
+                  <td data-day="giovedi"></td>
+                  <td data-day="venerdi"></td>
+                  <td data-day="sabato"></td>
+                  <td data-day="domenica"></td>
+                </tr>
+                <tr>
+                  <td colspan="7" style="font-style: italic; font-size: 0.89rem; text-align:center; color:#555;">Eventi per la settimana visualizzati giorno per giorno</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
       </section>
       <section id="routine" class="screen">
         <div class="card routine-card">
@@ -585,6 +594,90 @@ button.add-service:hover {
   </section>
 </div>
 <script>
+    // Global chat & calendar context
+    window.chatContext = { awaitingEvent: false };
+    window.calendarEvents = {
+      lunedi: ['Lavoro remoto'],
+      martedi: ['Riunione 10:00'],
+      mercoledi: [],
+      giovedi: [],
+      venerdi: [],
+      sabato: ['libero (tutti disponibili per pranzo!)'],
+      domenica: []
+    };
+
+    const DAY_DISPLAY = {
+      lunedi: 'Lunedì',
+      martedi: 'Martedì',
+      mercoledi: 'Mercoledì',
+      giovedi: 'Giovedì',
+      venerdi: 'Venerdì',
+      sabato: 'Sabato',
+      domenica: 'Domenica'
+    };
+
+    function renderCalendar() {
+      Object.keys(window.calendarEvents).forEach(day => {
+        const cell = document.querySelector(`#calendar td[data-day="${day}"]`);
+        if (!cell) return;
+        const items = window.calendarEvents[day];
+        cell.innerHTML = items.map(i => `<div class="calendar-event" title="${i}">${i}</div>`).join('');
+      });
+    }
+
+    function addCalendarEvent(name, dayNormalized) {
+      if (!dayNormalized || !window.calendarEvents[dayNormalized]) return false;
+      const events = window.calendarEvents[dayNormalized];
+      const DEFAULT_SABATO = 'libero (tutti disponibili per pranzo!)';
+      // If adding to Saturday and the default 'libero' exists, remove it first
+      if (dayNormalized === 'sabato') {
+        const idx = events.indexOf(DEFAULT_SABATO);
+        if (idx !== -1) events.splice(idx, 1);
+      }
+      events.push(name);
+      renderCalendar();
+      return true;
+    }
+
+    // Parse a user message to extract event name and weekday (basic heuristic)
+    function parseEventDetails(text) {
+      if (!text) return null;
+      // normalize: remove diacritics, lowercase
+      const norm = text.normalize ? text.normalize('NFD').replace(/\p{Diacritic}/gu, '') : text;
+      let t = String(norm).toLowerCase().trim();
+      // weekday tokens (normalized)
+      const days = ['lunedi','lunedì','martedi','martedì','mercoledi','mercoledì','giovedi','giovedì','venerdi','venerdì','sabato','domenica'];
+      let found = null;
+      for (const d of days) {
+        const dn = d.normalize ? d.normalize('NFD').replace(/\p{Diacritic}/gu, '') : d;
+        const re = new RegExp('\\b' + dn + '\\b');
+        if (re.test(t)) {
+          // map normalized to our keys (without diacritics)
+          const key = dn.replace(/\u0300|\u0301|\u0302|\u0303|\u0308/g, '');
+          // normalize key further to base letters
+          const base = key.replace(/[^a-z]/g, '');
+          // map to canonical keys
+          const map = {
+            'lunedi':'lunedi','lunedì':'lunedi','lunedi':'lunedi',
+            'martedi':'martedi','martedi':'martedi','martedi':'martedi',
+            'mercoledi':'mercoledi','mercoledi':'mercoledi',
+            'giovedi':'giovedi','giovedi':'giovedi',
+            'venerdi':'venerdi','venerdi':'venerdi',
+            'sabato':'sabato','domenica':'domenica'
+          };
+          // simpler: find which canonical day exists in dn
+          const canonical = Object.keys(DAY_DISPLAY).find(k => dn.indexOf(k.replace(/i$/,'')) !== -1) || dn;
+          found = canonical;
+          // remove the day word from t to get a candidate name
+          t = t.replace(re, '').replace(/\b(il|la|lo|l'|per|di|del|della)\b/g, '').replace(/[:,-]/g, ' ').trim();
+          break;
+        }
+      }
+      if (!found) return null;
+      const name = t.length ? t : null;
+      return { name, day: found };
+    }
+
 const integrationListDev = document.getElementById('integrationListDev');
 const addIntegrationBtnDev = document.getElementById('addIntegrationBtnDev');
 
@@ -723,6 +816,11 @@ function aiSuggestion(userMsg) {
     return responsesRoutine[Math.floor(Math.random() * responsesRoutine.length)];
   }
   if (/\bcalendario\b|\bevento\b|\brigunione\b|\bpromemoria\b/.test(text)) {
+    // If user expresses intent to add an event, set awaitingEvent state and ask for details
+    if (/\b(aggiung|aggiungere|voglio aggiungere|nuovo impegno|aggiungere un|aggiungo)\b/.test(text)) {
+      window.chatContext.awaitingEvent = true;
+      return "Perfetto, dimmi il nome dell'evento e il giorno";
+    }
     return responsesCalendario[Math.floor(Math.random() * responsesCalendario.length)];
   }
   if (/\bstato build\b|\bbuild\b|\bstato compilazione\b/.test(text)) {
@@ -742,14 +840,60 @@ function aiSuggestion(userMsg) {
 
 
   function performSend(msg) {
-  const trimmed = String(msg).trim();
-  if (trimmed === "") return;
-  appendMessage(trimmed, "Utente");
-  input.value = "";
-  sendBtn.disabled = true;
-  input.focus();
-  appendMessage(aiSuggestion(trimmed), "AI");
-}
+    const trimmed = String(msg).trim();
+    if (trimmed === "") return;
+    appendMessage(trimmed, "Utente");
+    input.value = "";
+    sendBtn.disabled = true;
+    input.focus();
+
+    // If we are awaiting event details, try to parse or request missing pieces
+    if (window.chatContext && window.chatContext.awaitingEvent) {
+      // If previously we stored only day and asked for name
+      if (window.chatContext.pendingDay) {
+        const name = trimmed;
+        const day = window.chatContext.pendingDay;
+        const ok = addCalendarEvent(name, day);
+        if (ok) {
+          appendMessage(`Evento aggiunto: ${name} — ${DAY_DISPLAY[day]}`, "AI");
+        } else {
+          appendMessage("Errore durante l'aggiunta dell'evento.", "AI");
+        }
+        window.chatContext.awaitingEvent = false;
+        window.chatContext.pendingDay = null;
+        return;
+      }
+
+      const details = parseEventDetails(trimmed);
+      if (!details) {
+        appendMessage("Non ho capito. Dimmi il nome dell'evento e il giorno (es. 'Cena mamma lunedi')", "AI");
+        // remain awaitingEvent
+        return;
+      }
+
+      if (!details.name) {
+        // We found a day but not a name: ask for the name and save day
+        window.chatContext.pendingDay = details.day;
+        appendMessage("Mi serve il nome dell'evento. Come si chiama?", "AI");
+        return;
+      }
+
+      // Have both name and day -> add event
+      const ok = addCalendarEvent(details.name, details.day);
+      if (ok) {
+        appendMessage(`Evento aggiunto: ${details.name} — ${DAY_DISPLAY[details.day]}`, "AI");
+      } else {
+        appendMessage("Errore durante l'aggiunta dell'evento.", "AI");
+      }
+      window.chatContext.awaitingEvent = false;
+      window.chatContext.pendingDay = null;
+      return;
+    }
+
+    // Default behaviour: get an AI suggestion/response
+    const aiResp = aiSuggestion(trimmed);
+    appendMessage(aiResp, "AI");
+  }
 
   sendBtn.addEventListener("click", () => { performSend(input.value); });
   input.addEventListener("keypress", e => {
@@ -797,6 +941,7 @@ function renderIntegrations() {
   });
 }
 renderIntegrations();
+renderCalendar();
   addIntegrationBtn.addEventListener('click', () => {
     const newName = prompt("Inserisci nome del nuovo servizio:");
     if(newName && newName.trim() !== "") {
