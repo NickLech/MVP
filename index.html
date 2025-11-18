@@ -387,6 +387,65 @@ button.add-service {
 button.add-service:hover {
   background: var(--verde);
 }
+/* Responsive: tablet and mobile adjustments */
+@media (max-width: 1024px) {
+  html, body {
+    align-items: flex-start;
+    overflow: auto;
+  }
+  .app-wrapper {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-auto-rows: auto;
+    gap: 0.6rem;
+    padding: 0.6rem;
+    box-shadow: none;
+  }
+  .sidebar {
+    flex-direction: row;
+    align-items: center;
+    padding: 0.6rem;
+    border-radius: 12px;
+  }
+  .nav {
+    flex-direction: row;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+  }
+  .nav button {
+    white-space: nowrap;
+    padding: 0.45rem 0.6rem;
+    font-size: 0.95rem;
+  }
+  main {
+    padding: 1rem 0.6rem 0.6rem 0.6rem;
+  }
+  .content-scroll { max-height: none; }
+  .screen, .screen.active { padding: 16px; }
+  .card { padding: 0.8rem 1rem; margin-bottom: 0.9rem; }
+  .routine-card { max-width: 100%; margin: 0; }
+  .chat { border-left: none; border-top: 1px solid #e6e6e6; }
+  .chat-header { font-size: 1rem; padding: 0.7rem; }
+  .chat-messages { padding: 0.6rem; }
+  .chat-footer { padding: 0.65rem; }
+  .calendar-table thead tr th, .calendar-table tbody tr td { padding: 8px 6px; font-size: 0.85rem; }
+}
+@media (max-width: 480px) {
+  :root { --raggio: 12px; }
+  .sidebar h2 { font-size: 1rem; }
+  .app-wrapper { padding: 0.4rem; }
+  .nav button { padding: 0.35rem 0.5rem; font-size: 0.9rem; }
+  .card h3 { font-size: 1rem; }
+  .chat-messages .message { max-width: 100%; }
+  input { padding: 0.6rem; }
+  .suggestions button { padding: 0.35rem 0.6rem; font-size: 0.9rem; }
+  /* Make the two app wrappers stack nicely on very small screens */
+  #devPage, #userPage { display: grid !important; }
+}
 </style>
 </head>
 <body>
