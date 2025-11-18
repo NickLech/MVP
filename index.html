@@ -13,6 +13,18 @@
   --ombra: rgba(0, 0, 0, 0.15);
   --raggio: 16px;
 }
+/* Make sizing predictable and images/tables responsive */
+*, *::before, *::after { box-sizing: border-box; }
+img, video, svg { max-width: 100%; height: auto; display: block; }
+
+/* Prevent horizontal overflow: allow inner sections to scroll when needed */
+.app-wrapper { margin: 0.6rem auto; box-sizing: border-box; }
+.calendar-card { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.calendar-table { min-width: 680px; }
+
+/* Allow nav to scroll horizontally on small widths */
+.nav { -webkit-overflow-scrolling: touch; }
+
 /* Visual highlight for calendar updates */
 .cell-updated {
   animation: calendar-flash 0.9s ease;
@@ -28,10 +40,11 @@ html, body {
   font-family: "Segoe UI", Arial, sans-serif;
   background: linear-gradient(135deg, var(--verde) 20%, var(--blu) 80%);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   color: #222;
-  overflow: hidden;
+  overflow: auto;
+  min-height: 100vh;
 }
 .app-wrapper {
   width: 98%;
@@ -443,8 +456,19 @@ button.add-service:hover {
   .chat-messages .message { max-width: 100%; }
   input { padding: 0.6rem; }
   .suggestions button { padding: 0.35rem 0.6rem; font-size: 0.9rem; }
-  /* Make the two app wrappers stack nicely on very small screens */
-  #devPage, #userPage { display: grid !important; }
+
+}
+
+/* Keep the centered desktop layout for large screens */
+@media (min-width: 1025px) {
+  html, body {
+    align-items: center;
+    overflow: hidden;
+  }
+  .app-wrapper {
+    height: 93vh;
+    box-shadow: 0 10px 30px var(--ombra);
+  }
 }
 </style>
 </head>
