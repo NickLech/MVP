@@ -477,7 +477,7 @@ button.add-service:hover {
 <div class="app-wrapper" id="userPage">
   <aside class="sidebar">
     <div>
-      <h2>Routine Manager</h2>
+      <h2>ARP</h2>
       <nav class="nav" id="userNav">
         <button class="active" data-screen="dashboard">🏠 Dashboard</button>
         <button data-screen="calendar">📅 Calendario</button>
@@ -677,14 +677,21 @@ button.add-service:hover {
     // Global chat & calendar context
     window.chatContext = { awaitingEvent: false };
     window.calendarEvents = {
-      lunedi: ['Lavoro remoto'],
-      martedi: ['Riunione 10:00'],
+      lunedi: [{name: 'Lavoro remoto', time: '08:00'}],
+      martedi: [{name: 'Riunione', time: '10:00'}],
       mercoledi: [],
       giovedi: [],
       venerdi: [],
-      sabato: ['libero (tutti disponibili per pranzo!)'],
+      sabato: [{name: 'libero (tutti disponibili per pranzo!)', time: null}],
       domenica: []
     };
+
+    // NEW: Define routine with time ranges
+    window.dailyRoutine = [
+      { name: 'Meditazione', start: '07:00', end: '07:15', icon: '🧘', keywords: ['meditazione', 'yoga', 'respiro', 'mindfulness'] },
+      { name: 'Lavoro', start: '08:00', end: '17:00', icon: '⚡', keywords: ['lavoro', 'meeting', 'riunione', 'call', 'progetto', 'task', 'ufficio', 'cliente'] },
+      { name: 'Allenamento in palestra', start: '17:30', end: '19:00', icon: '🏃‍♂️', keywords: ['allenamento', 'palestra', 'sport', 'corsa', 'fitness', 'gym'] }
+    ];
 
     const DAY_DISPLAY = {
       lunedi: 'Lunedì',
@@ -696,27 +703,169 @@ button.add-service:hover {
       domenica: 'Domenica'
     };
 
+    // NEW: Check if event is compatible with routine (based on keywords)
+    function isEventCompatibleWithRoutine(eventName, routine) {
+      if (!eventName || !routine || !routine.keywords) return false;
+      
+      const normalized = eventName.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '');
+      
+      // Check if any routine keyword is present in event name
+      return routine.keywords.some(keyword => normalized.includes(keyword));
+    }
+
+    // NEW: Check if a time conflicts with routine
+    function checkRoutineConflict(time, eventName = null, dayOfWeek = null) {
+      if (!time) return null;
+      
+      const eventTime = time.split(':').map(Number);
+      const eventMinutes = eventTime[0] * 60 + eventTime[1];
+      
+      for (const routine of window.dailyRoutine) {
+        // NEW: Skip work routine on weekends
+        if (routine.name === 'Lavoro' && dayOfWeek && (dayOfWeek === 'sabato' || dayOfWeek === 'domenica')) {
+          continue; // Skip this routine for weekends
+        }
+        
+        const startTime = routine.start.split(':').map(Number);
+        const endTime = routine.end.split(':').map(Number);
+        const startMinutes = startTime[0] * 60 + startTime[1];
+        const endMinutes = endTime[0] * 60 + endTime[1];
+        
+        // Check if event time falls within routine time range
+        if (eventMinutes >= startMinutes && eventMinutes < endMinutes) {
+          // Check if event is compatible with this routine
+          if (eventName && isEventCompatibleWithRoutine(eventName, routine)) {
+            return null; // No conflict - event is compatible
+          }
+          return routine;
+        }
+      }
+      
+      return null;
+    }
+
+    // NEW: Suggest alternative times avoiding routine conflicts
+    function suggestAlternativeTime(originalTime) {
+      const suggestions = [];
+      
+      // Find free slots between and around routine blocks
+      const slots = [
+        { start: '06:00', end: '07:00', label: 'prima mattina' },
+        { start: '07:15', end: '08:00', label: 'dopo meditazione' },
+        { start: '19:00', end: '22:00', label: 'sera dopo allenamento' },
+        { start: '12:00', end: '13:00', label: 'pausa pranzo' }
+      ];
+      
+      for (const slot of slots) {
+        const conflict = checkRoutineConflict(slot.start);
+        if (!conflict) {
+          suggestions.push({ time: slot.start, label: slot.label });
+        }
+      }
+      
+      return suggestions.slice(0, 3); // Return top 3 suggestions
+    }
+
+    // NEW: Format time conflict message
+    function formatConflictMessage(conflictingRoutine, eventName, alternativeTimes) {
+      const alternatives = alternativeTimes.map(alt => 
+        `${alt.time} (${alt.label})`
+      ).join(', ');
+      
+      return `⚠️ Attenzione! "${eventName}" alle ${window.chatContext.conflictTime} è in conflitto con "${conflictingRoutine.name}" (${conflictingRoutine.start}-${conflictingRoutine.end}). Ti suggerisco questi orari alternativi: ${alternatives}. Quale preferisci? (oppure scrivi un altro orario)`;
+    }
+
+    // Analyze calendar and suggest best days
+    function suggestAvailableDays() {
+      const availability = [];
+      Object.keys(window.calendarEvents).forEach(day => {
+        const events = window.calendarEvents[day];
+        const count = events.length;
+        availability.push({ day, count, display: DAY_DISPLAY[day] });
+      });
+      // Sort by least busy
+      availability.sort((a, b) => a.count - b.count);
+      return availability;
+    }
+
+    function formatDaySuggestions(availability) {
+      const top3 = availability.slice(0, 3);
+      const suggestions = top3.map(a => {
+        const status = a.count === 0 ? 'completamente libero' : `${a.count} impegno/i`;
+        return `${a.display} (${status})`;
+      });
+      return suggestions.join(', ');
+    }
+
+    // Sort events by time within each day
+    function sortEventsByTime(events) {
+      return events.sort((a, b) => {
+        if (!a.time) return 1;
+        if (!b.time) return -1;
+        return a.time.localeCompare(b.time);
+      });
+    }
+
     function renderCalendar() {
       Object.keys(window.calendarEvents).forEach(day => {
         const cell = document.querySelector(`#calendar td[data-day="${day}"]`);
         if (!cell) return;
         const items = window.calendarEvents[day];
-        cell.innerHTML = items.map(i => `<div class="calendar-event" title="${i}">${i}</div>`).join('');
+        cell.innerHTML = items.map(event => {
+          const displayText = event.time ? `${event.time} - ${event.name}` : event.name;
+          return `<div class="calendar-event" title="${displayText}">${displayText}</div>`;
+        }).join('');
       });
     }
 
-    function addCalendarEvent(name, dayNormalized) {
+    // Updated to handle time
+    function addCalendarEvent(name, dayNormalized, time = null) {
       if (!dayNormalized || !window.calendarEvents[dayNormalized]) return false;
       const events = window.calendarEvents[dayNormalized];
       const DEFAULT_SABATO = 'libero (tutti disponibili per pranzo!)';
+      
       // If adding to Saturday and the default 'libero' exists, remove it first
       if (dayNormalized === 'sabato') {
-        const idx = events.indexOf(DEFAULT_SABATO);
+        const idx = events.findIndex(e => e.name === DEFAULT_SABATO);
         if (idx !== -1) events.splice(idx, 1);
       }
-      events.push(name);
+      
+      events.push({ name, time });
+      window.calendarEvents[dayNormalized] = sortEventsByTime(events);
       renderCalendar();
       return true;
+    }
+
+    // Clean up event name by removing leading articles
+    function cleanEventName(text) {
+      if (!text) return text;
+      // Remove leading articles and trim
+      return text.replace(/^(un|una|uno|il|la|lo|l'|i|gli|le)\s+/i, '').trim();
+    }
+
+    // Parse time from text (e.g., "alle 14:30", "14:00", "alle 9")
+    function parseTime(text) {
+      if (!text) return null;
+      const normalized = text.toLowerCase().trim();
+      
+      // Match patterns like "14:30", "alle 14:30", "14", "alle 9"
+      const timePatterns = [
+        /\b(\d{1,2}):(\d{2})\b/,           // 14:30
+        /\balle?\s+(\d{1,2}):(\d{2})\b/,  // alle 14:30
+        /\balle?\s+(\d{1,2})\b/,          // alle 14
+        /\b(\d{1,2})\s*:\s*(\d{2})\b/     // 14 : 30
+      ];
+      
+      for (const pattern of timePatterns) {
+        const match = normalized.match(pattern);
+        if (match) {
+          const hours = match[1];
+          const minutes = match[2] || '00';
+          return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
+        }
+      }
+      
+      return null;
     }
 
     // Parse a user message to extract event name and weekday (basic heuristic)
@@ -725,6 +874,18 @@ button.add-service:hover {
       // normalize: remove diacritics, lowercase
       const norm = text.normalize ? text.normalize('NFD').replace(/\p{Diacritic}/gu, '') : text;
       let t = String(norm).toLowerCase().trim();
+      
+      // NEW: Remove trigger words and modal verbs first
+      t = t.replace(/\b(aggiungi|aggiung|aggiungere|voglio aggiungere|inserisci|metti|crea evento|crea|vorrei|voglio|dovrei|potrei|posso)\b/g, '').trim();
+      
+      // Extract time first
+      const time = parseTime(t);
+      // Remove time from text
+      if (time) {
+        t = t.replace(/\b(alle?|at)?\s*\d{1,2}\s*:\s*\d{2}\b/g, '')
+             .replace(/\balle?\s+\d{1,2}\b/g, '');
+      }
+      
       // weekday tokens (normalized)
       const days = ['lunedi','lunedì','martedi','martedì','mercoledi','mercoledì','giovedi','giovedì','venerdi','venerdì','sabato','domenica'];
       let found = null;
@@ -732,20 +893,6 @@ button.add-service:hover {
         const dn = d.normalize ? d.normalize('NFD').replace(/\p{Diacritic}/gu, '') : d;
         const re = new RegExp('\\b' + dn + '\\b');
         if (re.test(t)) {
-          // map normalized to our keys (without diacritics)
-          const key = dn.replace(/\u0300|\u0301|\u0302|\u0303|\u0308/g, '');
-          // normalize key further to base letters
-          const base = key.replace(/[^a-z]/g, '');
-          // map to canonical keys
-          const map = {
-            'lunedi':'lunedi','lunedì':'lunedi','lunedi':'lunedi',
-            'martedi':'martedi','martedi':'martedi','martedi':'martedi',
-            'mercoledi':'mercoledi','mercoledi':'mercoledi',
-            'giovedi':'giovedi','giovedi':'giovedi',
-            'venerdi':'venerdi','venerdi':'venerdi',
-            'sabato':'sabato','domenica':'domenica'
-          };
-          // simpler: find which canonical day exists in dn
           const canonical = Object.keys(DAY_DISPLAY).find(k => dn.indexOf(k.replace(/i$/,'')) !== -1) || dn;
           found = canonical;
           // remove the day word from t to get a candidate name
@@ -754,8 +901,15 @@ button.add-service:hover {
         }
       }
       if (!found) return null;
-      const name = t.length ? t : null;
-      return { name, day: found };
+      
+      // Clean up the name
+      let name = t.length ? cleanEventName(t) : null;
+      // Capitalize first letter
+      if (name) {
+        name = name.charAt(0).toUpperCase() + name.slice(1);
+      }
+      
+      return { name, day: found, time };
     }
 
 const integrationListDev = document.getElementById('integrationListDev');
@@ -856,7 +1010,7 @@ function aiSuggestion(userMsg) {
   ];
 
   const responsesRoutine = [
-    "Ti suggerisco di fare la spesa verso le 18:00, dopo l’allenamento.",
+    "Ti suggerisco di fare la spesa verso le 18:00, dopo l'allenamento.",
     "Hai già impostato la meditazione ogni mattina alle 7:00.",
     "Per migliorare la routine potresti aggiungere una pausa relax a metà pomeriggio.",
     "La tua routine è molto equilibrata, continua così!"
@@ -889,6 +1043,29 @@ function aiSuggestion(userMsg) {
     return "Nessun problema, fammi sapere se posso aiutarti con altro.";
   }
 
+  // NEW: Detect when user asks for event scheduling suggestions
+  if (/\b(quando posso|quando potrei|quando sono libero|suggerisci un giorno|quando aggiungere|miglior giorno|giorno libero|giorni disponibili)\b/.test(text)) {
+    // Extract potential event name from message
+    const eventMatch = text.match(/\b(aggiungere|inserire|mettere|programmare)\s+(.+?)(\?|$)/);
+    let eventName = eventMatch ? eventMatch[2].trim() : null;
+    
+    if (eventName) {
+      eventName = cleanEventName(eventName);
+      eventName = eventName.charAt(0).toUpperCase() + eventName.slice(1);
+    }
+    
+    const availability = suggestAvailableDays();
+    const suggestions = formatDaySuggestions(availability);
+    
+    if (eventName) {
+      window.chatContext.awaitingDayConfirmation = true;
+      window.chatContext.pendingEventName = eventName;
+      return `Per "${eventName}" ti suggerisco: ${suggestions}. Quale giorno preferisci?`;
+    } else {
+      return `I giorni migliori sono: ${suggestions}. Dimmi quale evento vuoi aggiungere e in che giorno.`;
+    }
+  }
+
   if (/\bfamiglia\b|\bparenti\b|\bfesta\b|\bpranzo\b/.test(text)) {
     return responsesFamiglia[Math.floor(Math.random() * responsesFamiglia.length)];
   }
@@ -899,7 +1076,7 @@ function aiSuggestion(userMsg) {
     // If user expresses intent to add an event, set awaitingEvent state and ask for details
     if (/\b(aggiungi|aggiung|aggiungere|voglio aggiungere|nuovo impegno|aggiungere un|aggiungo)\b/.test(text)) {
       window.chatContext.awaitingEvent = true;
-      return "Perfetto, dimmi il nome dell'evento e il giorno";
+      return "Perfetto, dimmi il nome dell'evento e il giorno (puoi includere anche l'orario)";
     }
     return responsesCalendario[Math.floor(Math.random() * responsesCalendario.length)];
   }
@@ -916,9 +1093,6 @@ function aiSuggestion(userMsg) {
   return "Al momento non sono capace di aiutarti su questo, ma sto continuando a imparare.";
 }
 
-
-
-
   function performSend(msg) {
     const trimmed = String(msg).trim();
     if (trimmed === "") return;
@@ -927,27 +1101,218 @@ function aiSuggestion(userMsg) {
     sendBtn.disabled = true;
     input.focus();
 
-    // If we are awaiting event details, try to parse or request missing pieces
-    if (window.chatContext && window.chatContext.awaitingEvent) {
-      // If previously we stored only day and asked for name
-      if (window.chatContext.pendingDay) {
-        const name = trimmed;
-        const day = window.chatContext.pendingDay;
-        const ok = addCalendarEvent(name, day);
+    // Handle conflict resolution
+    if (window.chatContext && window.chatContext.awaitingConflictResolution) {
+      const time = parseTime(trimmed);
+      
+      if (time) {
+        // Check if new time also conflicts (pass the day)
+        const conflict = checkRoutineConflict(time, window.chatContext.pendingEventName, window.chatContext.pendingDay);
+        if (conflict) {
+          const alternatives = suggestAlternativeTime(time);
+          appendMessage(formatConflictMessage(conflict, window.chatContext.pendingEventName, alternatives), "AI");
+          window.chatContext.conflictTime = time;
+          return;
+        }
+        
+        // No conflict, add event
+        const ok = addCalendarEvent(
+          window.chatContext.pendingEventName,
+          window.chatContext.pendingDay,
+          time
+        );
         if (ok) {
-          appendMessage(`Evento aggiunto: ${name} — ${DAY_DISPLAY[day]}`, "AI");
+          appendMessage(`✅ Evento aggiunto: ${window.chatContext.pendingEventName} — ${DAY_DISPLAY[window.chatContext.pendingDay]} alle ${time}`, "AI");
         } else {
           appendMessage("Errore durante l'aggiunta dell'evento.", "AI");
         }
+        
+        // Reset all flags
+        window.chatContext.awaitingConflictResolution = false;
+        window.chatContext.awaitingTimeConfirmation = false;
+        window.chatContext.awaitingDayConfirmation = false;
+        window.chatContext.pendingEventName = null;
+        window.chatContext.pendingDay = null;
+        window.chatContext.conflictTime = null;
+        return;
+      } else {
+        appendMessage("Non ho capito l'orario. Puoi riprovare? (es. 19:30)", "AI");
+        return;
+      }
+    }
+
+    // Handle time confirmation after day selection
+    if (window.chatContext && window.chatContext.awaitingTimeConfirmation) {
+      // Check if user wants to skip
+      if (/\b(salta|skip|no|nessun|senza)\b/.test(trimmed.toLowerCase())) {
+        if (window.chatContext.pendingEventName && window.chatContext.pendingDay) {
+          const ok = addCalendarEvent(
+            window.chatContext.pendingEventName, 
+            window.chatContext.pendingDay,
+            null
+          );
+          if (ok) {
+            appendMessage(`Evento aggiunto: ${window.chatContext.pendingEventName} — ${DAY_DISPLAY[window.chatContext.pendingDay]}`, "AI");
+          } else {
+            appendMessage("Errore durante l'aggiunta dell'evento.", "AI");
+          }
+          // Reset all flags
+          window.chatContext.awaitingTimeConfirmation = false;
+          window.chatContext.awaitingDayConfirmation = false;
+          window.chatContext.pendingEventName = null;
+          window.chatContext.pendingDay = null;
+          return;
+        }
+      }
+
+      const time = parseTime(trimmed);
+      
+      if (time && window.chatContext.pendingEventName && window.chatContext.pendingDay) {
+        // Check for routine conflict with event name and day
+        const conflict = checkRoutineConflict(time, window.chatContext.pendingEventName, window.chatContext.pendingDay);
+        if (conflict) {
+          const alternatives = suggestAlternativeTime(time);
+          window.chatContext.awaitingTimeConfirmation = false;
+          window.chatContext.awaitingConflictResolution = true;
+          window.chatContext.conflictTime = time;
+          appendMessage(formatConflictMessage(conflict, window.chatContext.pendingEventName, alternatives), "AI");
+          return;
+        }
+
+        const ok = addCalendarEvent(
+          window.chatContext.pendingEventName, 
+          window.chatContext.pendingDay,
+          time
+        );
+        if (ok) {
+          appendMessage(`✅ Evento aggiunto: ${window.chatContext.pendingEventName} — ${DAY_DISPLAY[window.chatContext.pendingDay]} alle ${time}`, "AI");
+        } else {
+          appendMessage("Errore durante l'aggiunta dell'evento.", "AI");
+        }
+        // Reset all flags
+        window.chatContext.awaitingTimeConfirmation = false;
+        window.chatContext.awaitingDayConfirmation = false;
+        window.chatContext.pendingEventName = null;
+        window.chatContext.pendingDay = null;
+        return;
+      } else {
+        appendMessage("Non ho capito l'orario. Puoi scriverlo in formato HH:MM (es. 14:30) o scrivere 'salta' per non specificarlo.", "AI");
+        return;
+      }
+    }
+
+    // Handle day confirmation after suggestion
+    if (window.chatContext && window.chatContext.awaitingDayConfirmation) {
+      const details = parseEventDetails(trimmed);
+      const day = details ? details.day : null;
+      
+      if (day && window.chatContext.pendingEventName) {
+        // Check if time was provided
+        if (details && details.time) {
+          // Check for routine conflict with event name and day
+          const conflict = checkRoutineConflict(details.time, window.chatContext.pendingEventName, day);
+          if (conflict) {
+            const alternatives = suggestAlternativeTime(details.time);
+            window.chatContext.awaitingDayConfirmation = false;
+            window.chatContext.awaitingConflictResolution = true;
+            window.chatContext.pendingDay = day;
+            window.chatContext.conflictTime = details.time;
+            appendMessage(formatConflictMessage(conflict, window.chatContext.pendingEventName, alternatives), "AI");
+            return;
+          }
+
+          const ok = addCalendarEvent(window.chatContext.pendingEventName, day, details.time);
+          if (ok) {
+            appendMessage(`✅ Evento aggiunto: ${window.chatContext.pendingEventName} — ${DAY_DISPLAY[day]} alle ${details.time}`, "AI");
+          } else {
+            appendMessage("Errore durante l'aggiunta dell'evento.", "AI");
+          }
+          // Reset all flags
+          window.chatContext.awaitingDayConfirmation = false;
+          window.chatContext.awaitingTimeConfirmation = false;
+          window.chatContext.pendingEventName = null;
+          window.chatContext.pendingDay = null;
+        } else {
+          // Ask for time
+          window.chatContext.awaitingDayConfirmation = false;
+          window.chatContext.awaitingTimeConfirmation = true;
+          window.chatContext.pendingDay = day;
+          appendMessage(`Perfetto, ${DAY_DISPLAY[day]}. A che ora? (es. 14:30 o scrivi 'salta' per non specificarlo)`, "AI");
+        }
+        return;
+      } else {
+        appendMessage("Non ho capito il giorno. Puoi ripetere? (es. lunedì, martedì...)", "AI");
+        return;
+      }
+    }
+
+    // If we are awaiting event details, try to parse or request missing pieces
+    if (window.chatContext && window.chatContext.awaitingEvent) {
+      // Check if user wants to skip time
+      if (/\b(salta|skip|no|nessun|senza)\b/.test(trimmed.toLowerCase())) {
+        if (window.chatContext.pendingDay && window.chatContext.pendingName) {
+          const ok = addCalendarEvent(window.chatContext.pendingName, window.chatContext.pendingDay, null);
+          if (ok) {
+            appendMessage(`Evento aggiunto: ${window.chatContext.pendingName} — ${DAY_DISPLAY[window.chatContext.pendingDay]}`, "AI");
+          } else {
+            appendMessage("Errore durante l'aggiunta dell'evento.", "AI");
+          }
+          // Reset all flags
+          window.chatContext.awaitingEvent = false;
+          window.chatContext.pendingDay = null;
+          window.chatContext.pendingName = null;
+          return;
+        }
+      }
+
+      // If previously we stored day and name, now waiting for time
+      if (window.chatContext.pendingDay && window.chatContext.pendingName) {
+        const time = parseTime(trimmed);
+        const day = window.chatContext.pendingDay;
+        const name = window.chatContext.pendingName;
+        
+        // Check for routine conflict with event name and day
+        if (time) {
+          const conflict = checkRoutineConflict(time, name, day);
+          if (conflict) {
+            const alternatives = suggestAlternativeTime(time);
+            window.chatContext.awaitingEvent = false;
+            window.chatContext.awaitingConflictResolution = true;
+            window.chatContext.conflictTime = time;
+            appendMessage(formatConflictMessage(conflict, name, alternatives), "AI");
+            return;
+          }
+        }
+
+        const ok = addCalendarEvent(name, day, time);
+        if (ok) {
+          const timeStr = time ? ` alle ${time}` : '';
+          appendMessage(`✅ Evento aggiunto: ${name} — ${DAY_DISPLAY[day]}${timeStr}`, "AI");
+        } else {
+          appendMessage("Errore durante l'aggiunta dell'evento.", "AI");
+        }
+        // Reset all flags
         window.chatContext.awaitingEvent = false;
         window.chatContext.pendingDay = null;
+        window.chatContext.pendingName = null;
+        return;
+      }
+
+      // If previously we stored only day and asked for name
+      if (window.chatContext.pendingDay) {
+        let name = cleanEventName(trimmed);
+        name = name.charAt(0).toUpperCase() + name.slice(1);
+        const day = window.chatContext.pendingDay;
+        
+        // Ask for time
+        window.chatContext.pendingName = name;
+        appendMessage(`A che ora è "${name}"? (es. 14:30 o scrivi 'salta' per non specificarlo)`, "AI");
         return;
       }
 
       const details = parseEventDetails(trimmed);
       if (!details) {
-        appendMessage("Non ho capito. Dimmi il nome dell'evento e il giorno (es. 'Cena mamma lunedi')", "AI");
-        // remain awaitingEvent
+        appendMessage("Non ho capito. Dimmi il nome dell'evento, il giorno e l'orario (es. 'Cena di lavoro lunedì alle 19:30')", "AI");
         return;
       }
 
@@ -958,16 +1323,116 @@ function aiSuggestion(userMsg) {
         return;
       }
 
-      // Have both name and day -> add event
-      const ok = addCalendarEvent(details.name, details.day);
-      if (ok) {
-        appendMessage(`Evento aggiunto: ${details.name} — ${DAY_DISPLAY[details.day]}`, "AI");
+      // Have name and day, check if we have time
+      if (details.time) {
+        // Check for routine conflict with event name and day
+        const conflict = checkRoutineConflict(details.time, details.name, details.day);
+        if (conflict) {
+          const alternatives = suggestAlternativeTime(details.time);
+          window.chatContext.awaitingEvent = false;
+          window.chatContext.awaitingConflictResolution = true;
+          window.chatContext.pendingDay = details.day;
+          window.chatContext.pendingName = details.name;
+          window.chatContext.conflictTime = details.time;
+          appendMessage(formatConflictMessage(conflict, details.name, alternatives), "AI");
+          return;
+        }
+
+        // Have everything -> add event
+        const ok = addCalendarEvent(details.name, details.day, details.time);
+        if (ok) {
+          appendMessage(`✅ Evento aggiunto: ${details.name} — ${DAY_DISPLAY[details.day]} alle ${details.time}`, "AI");
+        } else {
+          appendMessage("Errore durante l'aggiunta dell'evento.", "AI");
+        }
+        // Reset all flags
+        window.chatContext.awaitingEvent = false;
+        window.chatContext.pendingDay = null;
+        window.chatContext.pendingName = null;
       } else {
-        appendMessage("Errore durante l'aggiunta dell'evento.", "AI");
+        // Ask for time
+        window.chatContext.pendingDay = details.day;
+        window.chatContext.pendingName = details.name;
+        appendMessage(`A che ora è "${details.name}"? (es. 14:30 o scrivi 'salta' per non specificarlo)`, "AI");
       }
-      window.chatContext.awaitingEvent = false;
-      window.chatContext.pendingDay = null;
       return;
+    }
+
+    // NEW: Check if user wants suggestions first (before direct add)
+    const normalized = trimmed.normalize ? trimmed.normalize('NFD').replace(/\p{Diacritic}/gu, '') : trimmed;
+    const lowerText = normalized.toLowerCase();
+    
+    // Check for "vorrei" pattern - user wants suggestions
+    if (/\b(vorrei|dovrei|potrei|quando posso|quando potrei)\b/.test(lowerText)) {
+      // Try to extract event name
+      const text = lowerText.replace(/\b(vorrei|dovrei|potrei|quando posso|quando potrei|aggiungere|inserire|mettere|programmare|un|una|uno)\b/g, '').trim();
+      
+      // Try to parse to get clean event name
+      let eventName = null;
+      const tempDetails = parseEventDetails(trimmed);
+      if (tempDetails && tempDetails.name) {
+        eventName = tempDetails.name;
+      } else if (text.length > 0) {
+        eventName = cleanEventName(text);
+        eventName = eventName.charAt(0).toUpperCase() + eventName.slice(1);
+      }
+      
+      const availability = suggestAvailableDays();
+      const suggestions = formatDaySuggestions(availability);
+      
+      if (eventName) {
+        window.chatContext.awaitingDayConfirmation = true;
+        window.chatContext.pendingEventName = eventName;
+        appendMessage(`Per "${eventName}" ti suggerisco: ${suggestions}. Quale giorno preferisci?`, "AI");
+        return;
+      } else {
+        appendMessage(`I giorni migliori sono: ${suggestions}. Dimmi quale evento vuoi aggiungere e in che giorno.`, "AI");
+        return;
+      }
+    }
+    
+    // Check if user wants to add event directly
+    if (/\b(aggiungi|aggiung|aggiungere|voglio aggiungere|inserisci|metti|crea evento)\b/.test(lowerText)) {
+      // Try to parse full details immediately
+      const details = parseEventDetails(trimmed);
+      
+      if (details && details.name && details.day) {
+        // Have name and day
+        if (details.time) {
+          // Check for routine conflict with event name and day
+          const conflict = checkRoutineConflict(details.time, details.name, details.day);
+          if (conflict) {
+            const alternatives = suggestAlternativeTime(details.time);
+            window.chatContext.awaitingConflictResolution = true;
+            window.chatContext.pendingDay = details.day;
+            window.chatContext.pendingEventName = details.name;
+            window.chatContext.conflictTime = details.time;
+            appendMessage(formatConflictMessage(conflict, details.name, alternatives), "AI");
+            return;
+          }
+          
+          // No conflict, add directly
+          const ok = addCalendarEvent(details.name, details.day, details.time);
+          if (ok) {
+            appendMessage(`✅ Evento aggiunto: ${details.name} — ${DAY_DISPLAY[details.day]} alle ${details.time}`, "AI");
+          } else {
+            appendMessage("Errore durante l'aggiunta dell'evento.", "AI");
+          }
+          return;
+        } else {
+          // Ask for time
+          window.chatContext.awaitingEvent = true;
+          window.chatContext.pendingDay = details.day;
+          window.chatContext.pendingName = details.name;
+          appendMessage(`A che ora è "${details.name}"? (es. 14:30 o scrivi 'salta' per non specificarlo)`, "AI");
+          return;
+        }
+      } else {
+        // Not enough info, start the guided flow
+        window.chatContext.awaitingEvent = true;
+        appendMessage("Perfetto, dimmi il nome dell'evento e il giorno (puoi includere anche l'orario)", "AI");
+        return;
+      }
     }
 
     // Default behaviour: get an AI suggestion/response
