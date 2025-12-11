@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>ARP</title>
+<title>ARPAmind</title>
 <style>
 :root {
   --verde: #064420;
@@ -477,13 +477,13 @@ button.add-service:hover {
 <div class="app-wrapper" id="userPage">
   <aside class="sidebar">
     <div>
-      <h2>ARP</h2>
-      <nav class="nav" id="userNav">
-        <button class="active" data-screen="dashboard">🏠 Dashboard</button>
-        <button data-screen="calendar">📅 Calendario</button>
-        <button data-screen="routine">🧠 Routine</button>
-        <button data-screen="groups">👥 Gruppi</button>
-        <button data-screen="integrations">🔗 Integrazioni</button>
+      <h2>ARPAmind</h2>
+      <nav class="nav" id="userNav" role="navigation" aria-label="Menu principale utente">
+        <button class="active" data-screen="dashboard" aria-pressed="true">🏠 Dashboard</button>
+        <button data-screen="calendar" aria-pressed="false">📅 Calendario</button>
+        <button data-screen="routine" aria-pressed="false">🧠 Routine</button>
+        <button data-screen="groups" aria-pressed="false">👥 Gruppi</button>
+        <button data-screen="integrations" aria-pressed="false">🔗 Integrazioni</button>
       </nav>
     </div>
     <div class="switch-page">
@@ -581,9 +581,10 @@ button.add-service:hover {
     <div class="chat-messages" id="messages"></div>
     <div class="chat-footer">
       <div class="suggestions" id="suggestions" role="list">
-        <button data-msg="mostrami il calendario" role="listitem" aria-label="Mostrami il calendario">calendario</button>
-        <button data-msg="come migliorare la routine" role="listitem" aria-label="Come migliorare la routine">routine</button>
-        <button data-msg="eventi in famiglia" role="listitem" aria-label="Eventi in famiglia">famiglia</button>
+        <button data-msg="mostrami il calendario" role="listitem" aria-label="Mostrami il calendario">📅 calendario</button>
+        <button data-msg="come migliorare la routine" role="listitem" aria-label="Come migliorare la routine">🧠 routine</button>
+        <button data-msg="eventi in famiglia" role="listitem" aria-label="Eventi in famiglia">👥 famiglia</button>
+        <button data-msg="aggiungi evento" role="listitem" aria-label="Aggiungi nuovo evento">➕ nuovo evento</button>
       </div>
       <div class="input-row">
         <input id="userInput" type="text" placeholder="Scrivi o tocca un suggerimento..." aria-label="Input messaggio" />
@@ -596,12 +597,12 @@ button.add-service:hover {
   <aside class="sidebar">
     <div>
       <h2>Developer Hub</h2>
-      <nav class="nav" id="devNav">
-        <button class="active" data-screen="overview">🏗 Overview</button>
-        <button data-screen="github">🐙 GitHub</button>
-        <button data-screen="api">🔌 API</button>
-        <button data-screen="groupsDev">👥 Team</button>
-        <button data-screen="integrationsDev">🔗 Integrazioni</button>
+      <nav class="nav" id="devNav" role="navigation" aria-label="Menu principale developer">
+        <button class="active" data-screen="overview" aria-pressed="true">🏗 Overview</button>
+        <button data-screen="github" aria-pressed="false">🐙 GitHub</button>
+        <button data-screen="api" aria-pressed="false">🔌 API</button>
+        <button data-screen="groupsDev" aria-pressed="false">👥 Team</button>
+        <button data-screen="integrationsDev" aria-pressed="false">🔗 Integrazioni</button>
       </nav>
     </div>
     <div class="switch-page">
@@ -665,6 +666,8 @@ button.add-service:hover {
         <button data-msg="stato build">🏗 build</button>
         <button data-msg="api attive">🔌 api</button>
         <button data-msg="team progetto">👥 team</button>
+        <button data-msg="deploy status">🚀 deploy</button>
+        <button data-msg="performance">⚡ performance</button>
       </div>
       <div class="input-row">
         <input id="devInput" type="text" placeholder="Scrivi o tocca un suggerimento..." />
@@ -688,9 +691,9 @@ button.add-service:hover {
 
     // NEW: Define routine with time ranges
     window.dailyRoutine = [
-      { name: 'Meditazione', start: '07:00', end: '07:15', icon: '🧘', keywords: ['meditazione', 'yoga', 'respiro', 'mindfulness'] },
-      { name: 'Lavoro', start: '08:00', end: '17:00', icon: '⚡', keywords: ['lavoro', 'meeting', 'riunione', 'call', 'progetto', 'task', 'ufficio', 'cliente'] },
-      { name: 'Allenamento in palestra', start: '17:30', end: '19:00', icon: '🏃‍♂️', keywords: ['allenamento', 'palestra', 'sport', 'corsa', 'fitness', 'gym'] }
+      { name: 'Meditazione', start: '07:00', end: '07:15', icon: '🧘', keywords: ['meditazione', 'yoga', 'respiro', 'mindfulness', 'rilassamento', 'zen', 'contemplazione', 'preghiera', 'riflessione', 'calma', 'pace'] },
+      { name: 'Lavoro', start: '08:00', end: '17:00', icon: '⚡', keywords: ['lavoro', 'meeting', 'riunione', 'call', 'progetto', 'task', 'ufficio', 'cliente', 'conferenza', 'presentazione', 'colloquio', 'brainstorming', 'standup', 'scrum', 'demo', 'review', 'planning', 'workshop', 'formazione', 'corso', 'training'] },
+      { name: 'Allenamento in palestra', start: '17:30', end: '19:00', icon: '🏃‍♂️', keywords: ['allenamento', 'palestra', 'sport', 'corsa', 'fitness', 'gym', 'workout', 'cardio', 'pesi', 'yoga', 'pilates', 'nuoto', 'calcio', 'tennis', 'basket', 'crossfit', 'stretching'] }
     ];
 
     const DAY_DISPLAY = {
@@ -710,7 +713,25 @@ button.add-service:hover {
       const normalized = eventName.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '');
       
       // Check if any routine keyword is present in event name
-      return routine.keywords.some(keyword => normalized.includes(keyword));
+      const hasKeyword = routine.keywords.some(keyword => normalized.includes(keyword));
+      
+      // Additional smart matching for work-related events
+      if (routine.name === 'Lavoro') {
+        const workPatterns = [
+          /\b(di\s+)?lavoro\b/,
+          /\briunione\s+(di\s+)?(lavoro|ufficio|team|progetto)\b/,
+          /\bmeeting\s+(di\s+)?(lavoro|ufficio|team|progetto)\b/,
+          /\bcall\s+(di\s+)?(lavoro|ufficio|team|progetto)\b/,
+          /\b(con\s+)?(cliente|capo|collega|team)\b/,
+          /\bappuntamento\s+(di\s+)?lavoro\b/
+        ];
+        
+        if (workPatterns.some(pattern => pattern.test(normalized))) {
+          return true;
+        }
+      }
+      
+      return hasKeyword;
     }
 
     // NEW: Check if a time conflicts with routine
@@ -821,6 +842,8 @@ button.add-service:hover {
     // Updated to handle time
     function addCalendarEvent(name, dayNormalized, time = null) {
       if (!dayNormalized || !window.calendarEvents[dayNormalized]) return false;
+      if (!name || name.trim() === '') return false;
+      
       const events = window.calendarEvents[dayNormalized];
       const DEFAULT_SABATO = 'libero (tutti disponibili per pranzo!)';
       
@@ -830,10 +853,53 @@ button.add-service:hover {
         if (idx !== -1) events.splice(idx, 1);
       }
       
-      events.push({ name, time });
+      // Check for duplicate events
+      const duplicate = events.find(e => e.name.toLowerCase() === name.toLowerCase() && e.time === time);
+      if (duplicate) return false; // Don't add duplicates
+      
+      events.push({ name: name.trim(), time });
       window.calendarEvents[dayNormalized] = sortEventsByTime(events);
       renderCalendar();
+      
+      // Add visual feedback
+      const cell = document.querySelector(`#calendar td[data-day="${dayNormalized}"]`);
+      if (cell) {
+        cell.classList.add('cell-updated');
+        setTimeout(() => cell.classList.remove('cell-updated'), 900);
+      }
+      
       return true;
+    }
+
+    // Generate smart confirmation message
+    function getEventConfirmationMessage(eventName, day, time) {
+      const dayDisplay = DAY_DISPLAY[day];
+      const timeStr = time ? ` alle ${time}` : '';
+      
+      // Check if event was compatible with routine
+      if (time) {
+        const conflict = checkRoutineConflict(time, eventName, day);
+        if (!conflict) {
+          // Check if it was potentially compatible
+          for (const routine of window.dailyRoutine) {
+            if (routine.name === 'Lavoro' && day !== 'sabato' && day !== 'domenica') {
+              const startTime = routine.start.split(':').map(Number);
+              const endTime = routine.end.split(':').map(Number);
+              const eventTime = time.split(':').map(Number);
+              const startMinutes = startTime[0] * 60 + startTime[1];
+              const endMinutes = endTime[0] * 60 + endTime[1];
+              const eventMinutes = eventTime[0] * 60 + eventTime[1];
+              
+              if (eventMinutes >= startMinutes && eventMinutes < endMinutes && 
+                  isEventCompatibleWithRoutine(eventName, routine)) {
+                return `✅ Perfetto! "${eventName}" si integra bene con la tua routine lavorativa — ${dayDisplay}${timeStr}`;
+              }
+            }
+          }
+        }
+      }
+      
+      return `✅ Evento aggiunto: ${eventName} — ${dayDisplay}${timeStr}`;
     }
 
     // Clean up event name by removing leading articles
@@ -859,9 +925,15 @@ button.add-service:hover {
       for (const pattern of timePatterns) {
         const match = normalized.match(pattern);
         if (match) {
-          const hours = match[1];
+          let hours = parseInt(match[1]);
           const minutes = match[2] || '00';
-          return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
+          
+          // Validate hours (0-23)
+          if (hours < 0 || hours > 23) continue;
+          // Validate minutes (0-59)
+          if (parseInt(minutes) < 0 || parseInt(minutes) > 59) continue;
+          
+          return `${hours.toString().padStart(2, '0')}:${minutes.padStart(2, '0')}`;
         }
       }
       
@@ -889,6 +961,8 @@ button.add-service:hover {
       // weekday tokens (normalized)
       const days = ['lunedi','lunedì','martedi','martedì','mercoledi','mercoledì','giovedi','giovedì','venerdi','venerdì','sabato','domenica'];
       let found = null;
+      let originalT = t; // Keep original for name extraction
+      
       for (const d of days) {
         const dn = d.normalize ? d.normalize('NFD').replace(/\p{Diacritic}/gu, '') : d;
         const re = new RegExp('\\b' + dn + '\\b');
@@ -900,7 +974,18 @@ button.add-service:hover {
           break;
         }
       }
-      if (!found) return null;
+      
+      // If no day found, try to extract just the event name
+      if (!found) {
+        // Clean up the remaining text as potential event name
+        let name = originalT.replace(/\b(il|la|lo|l'|per|di|del|della|un|una|uno)\b/g, '').replace(/[:,-]/g, ' ').trim();
+        name = cleanEventName(name);
+        if (name && name.length > 0) {
+          name = name.charAt(0).toUpperCase() + name.slice(1);
+          return { name, day: null, time }; // Return with name but no day
+        }
+        return null;
+      }
       
       // Clean up the name
       let name = t.length ? cleanEventName(t) : null;
@@ -960,8 +1045,15 @@ addIntegrationBtnDev.addEventListener('click', () => {
 function setupNav(navId, mainId) {
   document.querySelectorAll(`#${navId} button`).forEach(btn => {
     btn.addEventListener("click", () => {
-      document.querySelectorAll(`#${navId} button`).forEach(b => b.classList.remove("active"));
+      // Update visual state and aria attributes
+      document.querySelectorAll(`#${navId} button`).forEach(b => {
+        b.classList.remove("active");
+        b.setAttribute("aria-pressed", "false");
+      });
       btn.classList.add("active");
+      btn.setAttribute("aria-pressed", "true");
+      
+      // Update screen visibility
       document.querySelectorAll(`#${mainId} .screen`).forEach(s => s.classList.remove("active"));
       document.getElementById(btn.dataset.screen).classList.add("active");
     });
@@ -1006,33 +1098,52 @@ function aiSuggestion(userMsg) {
 
   const responsesFamiglia = [
     "La famiglia ha un pranzo previsto per sabato, vuoi aggiungerlo al calendario?",
-    "Hai deciso se partecipare al pranzo di sabato?"
+    "Hai deciso se partecipare al pranzo di sabato?",
+    "Tutti i membri della famiglia sono liberi sabato - perfetto per organizzare qualcosa insieme!",
+    "Ho notato che nessuno sarà a casa prima delle 17:00 oggi. Vuoi che ti ricordi di coordinare la cena?"
   ];
 
   const responsesRoutine = [
     "Ti suggerisco di fare la spesa verso le 18:00, dopo l'allenamento.",
     "Hai già impostato la meditazione ogni mattina alle 7:00.",
     "Per migliorare la routine potresti aggiungere una pausa relax a metà pomeriggio.",
-    "La tua routine è molto equilibrata, continua così!"
+    "La tua routine è molto equilibrata, continua così!",
+    "Che ne dici di aggiungere 10 minuti di stretching dopo l'allenamento?",
+    "Potresti spostare la meditazione alla sera se la mattina è troppo frenetica."
   ];
 
   const responsesCalendario = [
     "Martedì alle 10:00 hai una riunione programmata, ti preparo tutto per tempo.",
     "Ho già aggiunto per te un evento importante questa settimana, te lo ricorderò il giorno prima.",
     "Il tuo calendario è sincronizzato e aggiornato.",
-    "Ti terrò aggiornato automaticamente con promemoria per i tuoi eventi importanti."
+    "Ti terrò aggiornato automaticamente con promemoria per i tuoi eventi importanti.",
+    "Questa settimana sembra abbastanza libera, vuoi che ti suggerisca delle attività?",
+    "Ho notato che hai molti impegni mercoledì, vuoi che sposti qualcosa?"
+  ];
+
+  const responsesGenerali = [
+    "Come posso aiutarti oggi? Posso gestire il tuo calendario, suggerire miglioramenti alla routine o coordinare con la famiglia.",
+    "Sono qui per semplificarti la vita! Dimmi cosa ti serve.",
+    "Vuoi che controlli i tuoi impegni di oggi o preferisci pianificare qualcosa di nuovo?",
+    "Posso aiutarti con promemoria, eventi o suggerimenti per ottimizzare la tua giornata."
   ];
 
   const buildStatusResponses = [
-    "📦 Lo stato dell'ultima build è OK: completata con successo alle 09:12 ✅. Il sistema gira su Node v20 con Next.js 15 e un database connesso."
+    "📦 Lo stato dell'ultima build è OK: completata con successo alle 09:12 ✅. Il sistema gira su Node v20 con Next.js 15 e un database connesso.",
+    "📦 Build pipeline attiva: 3 test passati, 0 errori. Deployment automatico abilitato.",
+    "📦 Ultima build: 2 minuti fa. Tutti i check di qualità superati ✅"
   ];
 
   const apiActiveResponses = [
-    "🔌 Le API attive includono gli endpoint /login, /sync e /groups con una latenza media di 120ms e stato operativo."
+    "🔌 Le API attive includono gli endpoint /login, /sync e /groups con una latenza media di 120ms e stato operativo.",
+    "🔌 API Status: /auth (98.5% uptime), /data (120ms avg), /webhooks (attivi). Tutto funziona correttamente.",
+    "🔌 Monitoraggio API: 15 richieste/min, 0 errori nelle ultime 24h, cache hit rate 85%"
   ];
 
   const teamProjectResponses = [
-    "👨‍💻 Il team di progetto comprende Anna (UI/UX), Marco (Backend) e Sara (Frontend). Attualmente lavorano alla homepage responsive e autenticazione API completata."
+    "👨‍💻 Il team di progetto comprende Anna (UI/UX), Marco (Backend) e Sara (Frontend). Attualmente lavorano alla homepage responsive e autenticazione API completata.",
+    "👨‍💻 Team update: Anna ha completato i mockup, Marco sta testando le API, Sara implementa i componenti React.",
+    "👨‍💻 Sprint in corso: 5 task completate, 3 in progress. Il team è in linea con le milestone."
   ];
 
   // Risposte a feedback utente
@@ -1043,28 +1154,27 @@ function aiSuggestion(userMsg) {
     return "Nessun problema, fammi sapere se posso aiutarti con altro.";
   }
 
-  // NEW: Detect when user asks for event scheduling suggestions
-  if (/\b(quando posso|quando potrei|quando sono libero|suggerisci un giorno|quando aggiungere|miglior giorno|giorno libero|giorni disponibili)\b/.test(text)) {
-    // Extract potential event name from message
-    const eventMatch = text.match(/\b(aggiungere|inserire|mettere|programmare)\s+(.+?)(\?|$)/);
-    let eventName = eventMatch ? eventMatch[2].trim() : null;
-    
-    if (eventName) {
-      eventName = cleanEventName(eventName);
-      eventName = eventName.charAt(0).toUpperCase() + eventName.slice(1);
-    }
-    
-    const availability = suggestAvailableDays();
-    const suggestions = formatDaySuggestions(availability);
-    
-    if (eventName) {
-      window.chatContext.awaitingDayConfirmation = true;
-      window.chatContext.pendingEventName = eventName;
-      return `Per "${eventName}" ti suggerisco: ${suggestions}. Quale giorno preferisci?`;
-    } else {
-      return `I giorni migliori sono: ${suggestions}. Dimmi quale evento vuoi aggiungere e in che giorno.`;
-    }
+  // Saluti e conversazione base
+  if (/\b(ciao|salve|buongiorno|buonasera|hey|hi)\b/.test(text)) {
+    return responsesGenerali[Math.floor(Math.random() * responsesGenerali.length)];
   }
+
+  // Aiuto e informazioni
+  if (/\b(aiuto|help|cosa puoi fare|funzioni|comandi)\b/.test(text)) {
+    return "Posso aiutarti con: 📅 gestione calendario, 🧠 ottimizzazione routine, 👥 coordinamento famiglia, 🔗 integrazioni servizi. Cosa ti serve?";
+  }
+
+  // Domande su produttività
+  if (/\b(produttività|produttivo|efficienza|ottimizzare|migliorare|organizzare)\b/.test(text)) {
+    return "Per migliorare la produttività ti suggerisco: blocchi di tempo dedicati, pause regolari, priorità chiare. Vuoi che analizzi la tua routine attuale?";
+  }
+
+  // Domande su notifiche e promemoria
+  if (/\b(notifica|promemoria|ricorda|avvisa|alert)\b/.test(text)) {
+    return "Posso impostare promemoria personalizzati per i tuoi eventi. Vuoi che ti ricordi qualcosa di specifico?";
+  }
+
+
 
   if (/\bfamiglia\b|\bparenti\b|\bfesta\b|\bpranzo\b/.test(text)) {
     return responsesFamiglia[Math.floor(Math.random() * responsesFamiglia.length)];
@@ -1087,11 +1197,56 @@ function aiSuggestion(userMsg) {
     return apiActiveResponses[0];
   }
   if (/\bteam progetto\b|\bteam\b|\bprogetto\b/.test(text)) {
-    return teamProjectResponses[0];
+    return teamProjectResponses[Math.floor(Math.random() * teamProjectResponses.length)];
+  }
+
+  // Risposte specifiche per developer
+  if (/\b(deploy|deployment|rilascio|release)\b/.test(text)) {
+    return "🚀 Ultimo deployment: main branch → production (3 min fa). Auto-deploy attivo su merge. Rollback disponibile se necessario.";
+  }
+
+  if (/\b(test|testing|unit test|integration)\b/.test(text)) {
+    return "🧪 Test suite: 47 unit tests (100% pass), 12 integration tests (100% pass). Coverage: 89%. Ultimo run: 5 min fa.";
+  }
+
+  if (/\b(database|db|sql|query)\b/.test(text)) {
+    return "🗄️ Database status: PostgreSQL 15.2, 3 connessioni attive, query avg 45ms. Backup automatico ogni 6h.";
+  }
+
+  if (/\b(log|logs|errori|error|debug)\b/.test(text)) {
+    return "📋 Logs recenti: 0 errori critici, 2 warning (cache timeout), 156 info. Monitoring attivo su Sentry.";
+  }
+
+  if (/\b(performance|prestazioni|latenza|speed)\b/.test(text)) {
+    return "⚡ Performance: API response 120ms avg, Frontend load 1.2s, Lighthouse score 94/100. Tutto nella norma.";
+  }
+
+  if (/\b(github|git|repository|repo|commit|pull request|pr)\b/.test(text)) {
+    return "🐙 GitHub: 2 PR aperte (review pending), 3 issue attive, ultimo commit 1h fa. Branch main protetto, CI/CD attivo.";
+  }
+
+  if (/\b(docker|container|kubernetes|k8s)\b/.test(text)) {
+    return "🐳 Containers: 3 pods running (web, api, worker), CPU 45%, RAM 2.1GB/4GB. Health checks OK.";
+  }
+
+  // Fallback più intelligente
+  if (text.length > 0) {
+    return "Non ho una risposta specifica per questo, ma posso aiutarti con calendario, routine, famiglia o questioni tecniche. Cosa ti serve?";
   }
 
   return "Al momento non sono capace di aiutarti su questo, ma sto continuando a imparare.";
 }
+
+  function resetChatContext() {
+    window.chatContext.awaitingEvent = false;
+    window.chatContext.awaitingConflictResolution = false;
+    window.chatContext.awaitingTimeConfirmation = false;
+    window.chatContext.awaitingDayConfirmation = false;
+    window.chatContext.pendingEventName = null;
+    window.chatContext.pendingDay = null;
+    window.chatContext.pendingName = null;
+    window.chatContext.conflictTime = null;
+  }
 
   function performSend(msg) {
     const trimmed = String(msg).trim();
@@ -1101,46 +1256,14 @@ function aiSuggestion(userMsg) {
     sendBtn.disabled = true;
     input.focus();
 
-    // Handle conflict resolution
-    if (window.chatContext && window.chatContext.awaitingConflictResolution) {
-      const time = parseTime(trimmed);
-      
-      if (time) {
-        // Check if new time also conflicts (pass the day)
-        const conflict = checkRoutineConflict(time, window.chatContext.pendingEventName, window.chatContext.pendingDay);
-        if (conflict) {
-          const alternatives = suggestAlternativeTime(time);
-          appendMessage(formatConflictMessage(conflict, window.chatContext.pendingEventName, alternatives), "AI");
-          window.chatContext.conflictTime = time;
-          return;
-        }
-        
-        // No conflict, add event
-        const ok = addCalendarEvent(
-          window.chatContext.pendingEventName,
-          window.chatContext.pendingDay,
-          time
-        );
-        if (ok) {
-          appendMessage(`✅ Evento aggiunto: ${window.chatContext.pendingEventName} — ${DAY_DISPLAY[window.chatContext.pendingDay]} alle ${time}`, "AI");
-        } else {
-          appendMessage("Errore durante l'aggiunta dell'evento.", "AI");
-        }
-        
-        // Reset all flags
-        window.chatContext.awaitingConflictResolution = false;
-        window.chatContext.awaitingTimeConfirmation = false;
-        window.chatContext.awaitingDayConfirmation = false;
-        window.chatContext.pendingEventName = null;
-        window.chatContext.pendingDay = null;
-        window.chatContext.conflictTime = null;
-        return;
-      } else {
-        appendMessage("Non ho capito l'orario. Puoi riprovare? (es. 19:30)", "AI");
-        return;
-      }
+    // Check for cancel/reset commands
+    if (/\b(annulla|cancella|reset|ricomincia|basta|stop)\b/.test(trimmed.toLowerCase())) {
+      resetChatContext();
+      appendMessage("Ok, ho cancellato tutto. Come posso aiutarti?", "AI");
+      return;
     }
 
+    // PRIORITY 1: Handle active conversation states FIRST
     // Handle time confirmation after day selection
     if (window.chatContext && window.chatContext.awaitingTimeConfirmation) {
       // Check if user wants to skip
@@ -1154,13 +1277,10 @@ function aiSuggestion(userMsg) {
           if (ok) {
             appendMessage(`Evento aggiunto: ${window.chatContext.pendingEventName} — ${DAY_DISPLAY[window.chatContext.pendingDay]}`, "AI");
           } else {
-            appendMessage("Errore durante l'aggiunta dell'evento.", "AI");
+            appendMessage(" Non sono riuscito ad aggiungere l'evento. Potrebbe essere un duplicato o ci sono dati mancanti.", "AI");
           }
           // Reset all flags
-          window.chatContext.awaitingTimeConfirmation = false;
-          window.chatContext.awaitingDayConfirmation = false;
-          window.chatContext.pendingEventName = null;
-          window.chatContext.pendingDay = null;
+          resetChatContext();
           return;
         }
       }
@@ -1185,15 +1305,12 @@ function aiSuggestion(userMsg) {
           time
         );
         if (ok) {
-          appendMessage(`✅ Evento aggiunto: ${window.chatContext.pendingEventName} — ${DAY_DISPLAY[window.chatContext.pendingDay]} alle ${time}`, "AI");
+          appendMessage(getEventConfirmationMessage(window.chatContext.pendingEventName, window.chatContext.pendingDay, time), "AI");
         } else {
-          appendMessage("Errore durante l'aggiunta dell'evento.", "AI");
+          appendMessage(" Non sono riuscito ad aggiungere l'evento. Potrebbe essere un duplicato o ci sono dati mancanti.", "AI");
         }
         // Reset all flags
-        window.chatContext.awaitingTimeConfirmation = false;
-        window.chatContext.awaitingDayConfirmation = false;
-        window.chatContext.pendingEventName = null;
-        window.chatContext.pendingDay = null;
+        resetChatContext();
         return;
       } else {
         appendMessage("Non ho capito l'orario. Puoi scriverlo in formato HH:MM (es. 14:30) o scrivere 'salta' per non specificarlo.", "AI");
@@ -1201,10 +1318,97 @@ function aiSuggestion(userMsg) {
       }
     }
 
+    // PRIORITY 2: Handle suggestion requests (before other add event logic)
+    const normalizedText = trimmed.normalize ? trimmed.normalize('NFD').replace(/\p{Diacritic}/gu, '') : trimmed;
+    const text = String(normalizedText).toLowerCase().trim();
+    
+    if (/\b(quando posso|quando potrei|quando sono libero|suggerisci un giorno|quando aggiungere|miglior giorno|giorno libero|giorni disponibili)\b/.test(text)) {
+      // Extract potential event name from message with better parsing
+      let eventName = null;
+      
+      // More specific pattern for "quando posso aggiungere X?"
+      const whenCanPattern = /\b(quando posso|quando potrei)\s+(aggiungere|inserire|mettere|programmare)\s+([a-zA-ZàáâäèéêëìíîïòóôöùúûüñçÀÁÂÄÈÉÊËÌÍÎÏÒÓÔÖÙÚÛÜÑÇ\s]+?)(\?|$)/;
+      const match = text.match(whenCanPattern);
+      
+      if (match) {
+        // Extract just the event name (3rd capture group)
+        let rawName = match[3].trim();
+        
+        // Clean up the name more aggressively
+        rawName = rawName
+          .replace(/\b(quando|dove|come|perché|perche|cosa|che|posso|potrei|dovrei|voglio|vorrei)\b/g, '')
+          .replace(/\b(il|la|lo|l'|un|una|uno|del|della|di|da|in|con|per)\b/g, '')
+          .replace(/[?!.,;:]/g, '')
+          .trim();
+        
+        if (rawName && rawName.length > 0) {
+          eventName = cleanEventName(rawName);
+          if (eventName && eventName.length > 0) {
+            eventName = eventName.charAt(0).toUpperCase() + eventName.slice(1);
+          }
+        }
+      }
+      
+      const availability = suggestAvailableDays();
+      const suggestions = formatDaySuggestions(availability);
+      
+      if (eventName && eventName.length > 0) {
+        window.chatContext.awaitingDayConfirmation = true;
+        window.chatContext.pendingEventName = eventName;
+        appendMessage(`Per "${eventName}" ti suggerisco: ${suggestions}. Quale giorno preferisci?`, "AI");
+      } else {
+        appendMessage(`I giorni migliori sono: ${suggestions}. Dimmi quale evento vuoi aggiungere e in che giorno.`, "AI");
+      }
+      return;
+    }
+
+    // Handle conflict resolution
+    if (window.chatContext && window.chatContext.awaitingConflictResolution) {
+      const time = parseTime(trimmed);
+      
+      if (time) {
+        // Check if new time also conflicts (pass the day)
+        const conflict = checkRoutineConflict(time, window.chatContext.pendingEventName, window.chatContext.pendingDay);
+        if (conflict) {
+          const alternatives = suggestAlternativeTime(time);
+          appendMessage(formatConflictMessage(conflict, window.chatContext.pendingEventName, alternatives), "AI");
+          window.chatContext.conflictTime = time;
+          return;
+        }
+        
+        // No conflict, add event
+        const ok = addCalendarEvent(
+          window.chatContext.pendingEventName,
+          window.chatContext.pendingDay,
+          time
+        );
+        if (ok) {
+          appendMessage(getEventConfirmationMessage(window.chatContext.pendingEventName, window.chatContext.pendingDay, time), "AI");
+        } else {
+          appendMessage(" Non sono riuscito ad aggiungere l'evento. Potrebbe essere un duplicato o ci sono dati mancanti.", "AI");
+        }
+        
+        // Reset all flags
+        resetChatContext();
+        return;
+      } else {
+        appendMessage("Non ho capito l'orario. Puoi riprovare? (es. 19:30)", "AI");
+        return;
+      }
+    }
+
+    // (Removed duplicate time confirmation logic - now handled at top)
+
     // Handle day confirmation after suggestion
     if (window.chatContext && window.chatContext.awaitingDayConfirmation) {
-      const details = parseEventDetails(trimmed);
-      const day = details ? details.day : null;
+      // Check if user is asking a new suggestion question instead of answering
+      if (/\b(quando posso|quando potrei|quando sono libero|suggerisci|vorrei aggiungere)\b/.test(trimmed.toLowerCase())) {
+        // User is asking a new question, reset context and handle as new request
+        resetChatContext();
+        // Let the message be processed as a new request by continuing to the next logic
+      } else {
+        const details = parseEventDetails(trimmed);
+        const day = details ? details.day : null;
       
       if (day && window.chatContext.pendingEventName) {
         // Check if time was provided
@@ -1213,7 +1417,7 @@ function aiSuggestion(userMsg) {
           const conflict = checkRoutineConflict(details.time, window.chatContext.pendingEventName, day);
           if (conflict) {
             const alternatives = suggestAlternativeTime(details.time);
-            window.chatContext.awaitingDayConfirmation = false;
+            resetChatContext();
             window.chatContext.awaitingConflictResolution = true;
             window.chatContext.pendingDay = day;
             window.chatContext.conflictTime = details.time;
@@ -1225,24 +1429,22 @@ function aiSuggestion(userMsg) {
           if (ok) {
             appendMessage(`✅ Evento aggiunto: ${window.chatContext.pendingEventName} — ${DAY_DISPLAY[day]} alle ${details.time}`, "AI");
           } else {
-            appendMessage("Errore durante l'aggiunta dell'evento.", "AI");
+            appendMessage(" Non sono riuscito ad aggiungere l'evento. Potrebbe essere un duplicato o ci sono dati mancanti.", "AI");
           }
           // Reset all flags
-          window.chatContext.awaitingDayConfirmation = false;
-          window.chatContext.awaitingTimeConfirmation = false;
-          window.chatContext.pendingEventName = null;
-          window.chatContext.pendingDay = null;
+          resetChatContext();
         } else {
           // Ask for time
-          window.chatContext.awaitingDayConfirmation = false;
+          resetChatContext();
           window.chatContext.awaitingTimeConfirmation = true;
           window.chatContext.pendingDay = day;
           appendMessage(`Perfetto, ${DAY_DISPLAY[day]}. A che ora? (es. 14:30 o scrivi 'salta' per non specificarlo)`, "AI");
         }
         return;
-      } else {
-        appendMessage("Non ho capito il giorno. Puoi ripetere? (es. lunedì, martedì...)", "AI");
-        return;
+        } else {
+          appendMessage("Non ho capito il giorno. Puoi ripetere? (es. lunedì, martedì...)", "AI");
+          return;
+        }
       }
     }
 
@@ -1255,12 +1457,10 @@ function aiSuggestion(userMsg) {
           if (ok) {
             appendMessage(`Evento aggiunto: ${window.chatContext.pendingName} — ${DAY_DISPLAY[window.chatContext.pendingDay]}`, "AI");
           } else {
-            appendMessage("Errore durante l'aggiunta dell'evento.", "AI");
+            appendMessage(" Non sono riuscito ad aggiungere l'evento. Potrebbe essere un duplicato o ci sono dati mancanti.", "AI");
           }
           // Reset all flags
-          window.chatContext.awaitingEvent = false;
-          window.chatContext.pendingDay = null;
-          window.chatContext.pendingName = null;
+          resetChatContext();
           return;
         }
       }
@@ -1276,7 +1476,7 @@ function aiSuggestion(userMsg) {
           const conflict = checkRoutineConflict(time, name, day);
           if (conflict) {
             const alternatives = suggestAlternativeTime(time);
-            window.chatContext.awaitingEvent = false;
+            resetChatContext();
             window.chatContext.awaitingConflictResolution = true;
             window.chatContext.conflictTime = time;
             appendMessage(formatConflictMessage(conflict, name, alternatives), "AI");
@@ -1289,13 +1489,27 @@ function aiSuggestion(userMsg) {
           const timeStr = time ? ` alle ${time}` : '';
           appendMessage(`✅ Evento aggiunto: ${name} — ${DAY_DISPLAY[day]}${timeStr}`, "AI");
         } else {
-          appendMessage("Errore durante l'aggiunta dell'evento.", "AI");
+          appendMessage(" Non sono riuscito ad aggiungere l'evento. Potrebbe essere un duplicato o ci sono dati mancanti.", "AI");
         }
         // Reset all flags
-        window.chatContext.awaitingEvent = false;
-        window.chatContext.pendingDay = null;
-        window.chatContext.pendingName = null;
+        resetChatContext();
         return;
+      }
+
+      // If previously we stored only name and asked for day
+      if (window.chatContext.pendingName) {
+        const details = parseEventDetails(trimmed);
+        const day = details ? details.day : null;
+        
+        if (day) {
+          // Got the day, now ask for time
+          window.chatContext.pendingDay = day;
+          appendMessage(`Perfetto! A che ora è "${window.chatContext.pendingName}"? (es. 14:30 o scrivi 'salta' per non specificarlo)`, "AI");
+          return;
+        } else {
+          appendMessage("Non ho capito il giorno. Puoi ripetere? (es. lunedì, martedì...)", "AI");
+          return;
+        }
       }
 
       // If previously we stored only day and asked for name
@@ -1329,7 +1543,7 @@ function aiSuggestion(userMsg) {
         const conflict = checkRoutineConflict(details.time, details.name, details.day);
         if (conflict) {
           const alternatives = suggestAlternativeTime(details.time);
-          window.chatContext.awaitingEvent = false;
+          resetChatContext();
           window.chatContext.awaitingConflictResolution = true;
           window.chatContext.pendingDay = details.day;
           window.chatContext.pendingName = details.name;
@@ -1343,12 +1557,10 @@ function aiSuggestion(userMsg) {
         if (ok) {
           appendMessage(`✅ Evento aggiunto: ${details.name} — ${DAY_DISPLAY[details.day]} alle ${details.time}`, "AI");
         } else {
-          appendMessage("Errore durante l'aggiunta dell'evento.", "AI");
+          appendMessage(" Non sono riuscito ad aggiungere l'evento. Potrebbe essere un duplicato o ci sono dati mancanti.", "AI");
         }
         // Reset all flags
-        window.chatContext.awaitingEvent = false;
-        window.chatContext.pendingDay = null;
-        window.chatContext.pendingName = null;
+        resetChatContext();
       } else {
         // Ask for time
         window.chatContext.pendingDay = details.day;
@@ -1363,24 +1575,31 @@ function aiSuggestion(userMsg) {
     const lowerText = normalized.toLowerCase();
     
     // Check for "vorrei" pattern - user wants suggestions
-    if (/\b(vorrei|dovrei|potrei|quando posso|quando potrei)\b/.test(lowerText)) {
-      // Try to extract event name
-      const text = lowerText.replace(/\b(vorrei|dovrei|potrei|quando posso|quando potrei|aggiungere|inserire|mettere|programmare|un|una|uno)\b/g, '').trim();
+    if (/\b(vorrei|dovrei|potrei)\b/.test(lowerText) && !/\b(quando posso|quando potrei|quando sono libero)\b/.test(lowerText)) {
+      // Try to extract event name with better parsing
+      let eventName = null;
+      
+      // Clean the text by removing modal verbs and common words
+      const cleanText = lowerText
+        .replace(/\b(vorrei|dovrei|potrei|aggiungere|inserire|mettere|programmare|un|una|uno|il|la|lo|l')\b/g, '')
+        .replace(/\b(quando|dove|come|perché|perche|cosa|che)\b/g, '')
+        .trim();
       
       // Try to parse to get clean event name
-      let eventName = null;
       const tempDetails = parseEventDetails(trimmed);
       if (tempDetails && tempDetails.name) {
         eventName = tempDetails.name;
-      } else if (text.length > 0) {
-        eventName = cleanEventName(text);
-        eventName = eventName.charAt(0).toUpperCase() + eventName.slice(1);
+      } else if (cleanText.length > 0) {
+        eventName = cleanEventName(cleanText);
+        if (eventName && eventName.length > 0) {
+          eventName = eventName.charAt(0).toUpperCase() + eventName.slice(1);
+        }
       }
       
       const availability = suggestAvailableDays();
       const suggestions = formatDaySuggestions(availability);
       
-      if (eventName) {
+      if (eventName && eventName.length > 0) {
         window.chatContext.awaitingDayConfirmation = true;
         window.chatContext.pendingEventName = eventName;
         appendMessage(`Per "${eventName}" ti suggerisco: ${suggestions}. Quale giorno preferisci?`, "AI");
@@ -1416,7 +1635,7 @@ function aiSuggestion(userMsg) {
           if (ok) {
             appendMessage(`✅ Evento aggiunto: ${details.name} — ${DAY_DISPLAY[details.day]} alle ${details.time}`, "AI");
           } else {
-            appendMessage("Errore durante l'aggiunta dell'evento.", "AI");
+            appendMessage(" Non sono riuscito ad aggiungere l'evento. Potrebbe essere un duplicato o ci sono dati mancanti.", "AI");
           }
           return;
         } else {
@@ -1427,6 +1646,12 @@ function aiSuggestion(userMsg) {
           appendMessage(`A che ora è "${details.name}"? (es. 14:30 o scrivi 'salta' per non specificarlo)`, "AI");
           return;
         }
+      } else if (details && details.name && !details.day) {
+        // Have name but no day - ask for day
+        window.chatContext.awaitingEvent = true;
+        window.chatContext.pendingName = details.name;
+        appendMessage(`Perfetto! In che giorno vuoi aggiungere "${details.name}"? (es. lunedì, martedì...)`, "AI");
+        return;
       } else {
         // Not enough info, start the guided flow
         window.chatContext.awaitingEvent = true;
@@ -1436,8 +1661,16 @@ function aiSuggestion(userMsg) {
     }
 
     // Default behaviour: get an AI suggestion/response
-    const aiResp = aiSuggestion(trimmed);
-    appendMessage(aiResp, "AI");
+    // Show typing indicator
+    const typingMsg = appendMessage("Sto pensando...", "AI", true);
+    
+    setTimeout(() => {
+      // Remove typing indicator
+      typingMsg.remove();
+      // Show actual response
+      const aiResp = aiSuggestion(trimmed);
+      appendMessage(aiResp, "AI");
+    }, 800 + Math.random() * 1200); // Random delay between 0.8-2s for realism
   }
 
   sendBtn.addEventListener("click", () => { performSend(input.value); });
@@ -1447,12 +1680,45 @@ function aiSuggestion(userMsg) {
       performSend(input.value);
     }
   });
+  function updateSuggestions(newSuggestions) {
+    suggestions.innerHTML = '';
+    newSuggestions.forEach(suggestion => {
+      const btn = document.createElement('button');
+      btn.setAttribute('data-msg', suggestion.msg);
+      btn.setAttribute('role', 'listitem');
+      btn.setAttribute('aria-label', suggestion.label);
+      btn.textContent = suggestion.text;
+      btn.addEventListener('click', () => performSend(suggestion.msg));
+      suggestions.appendChild(btn);
+    });
+  }
+
   suggestions.querySelectorAll("button").forEach(b => {
     b.addEventListener("click", () => { performSend(b.dataset.msg); });
   });
 }
 setupChat("messages", "userInput", "sendBtn", "suggestions");
 setupChat("messagesDev", "devInput", "devSendBtn", "suggestionsDev");
+
+// Add welcome messages
+setTimeout(() => {
+  const userMessages = document.getElementById("messages");
+  const devMessages = document.getElementById("messagesDev");
+  
+  // User welcome message
+  const userWelcome = document.createElement("div");
+  userWelcome.className = "message AI";
+  userWelcome.textContent = "👋 Ciao! Sono il tuo assistente personale ARPAmind. Posso aiutarti con calendario, routine e coordinamento famiglia. Come posso aiutarti oggi?";
+  userMessages.appendChild(userWelcome);
+  userMessages.scrollTop = userMessages.scrollHeight;
+  
+  // Developer welcome message  
+  const devWelcome = document.createElement("div");
+  devWelcome.className = "message AI";
+  devWelcome.textContent = "🚀 Developer Hub attivo! Posso aiutarti con build status, API monitoring, team coordination e deployment. Cosa vuoi controllare?";
+  devMessages.appendChild(devWelcome);
+  devMessages.scrollTop = devMessages.scrollHeight;
+}, 1000);
 const integrationList = document.getElementById('integrationList');
 const addIntegrationBtn = document.getElementById('addIntegrationBtn');
 let integrations = [

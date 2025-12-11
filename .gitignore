@@ -1,2 +1,6 @@
 # Ignore Copilot instructions file
 .github/copilot-instructions.md
+
+# Test files for development
+test-scenarios.md
+quick-test.html
